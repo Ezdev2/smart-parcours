@@ -1,61 +1,77 @@
 <template>
-  <nav class="bg-white shadow-sm border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-16">
-        <div class="flex">
-          <div class="flex-shrink-0 flex items-center">
-            <h1 class="text-xl font-bold text-blue-600">SmartParcours</h1>
-          </div>
-          <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-            <router-link
-              v-for="item in navItems"
-              :key="item.name"
-              :to="item.href"
-              class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-300 transition-colors"
-              active-class="border-blue-600 text-blue-600"
-            >
-              <component :is="item.icon" class="h-4 w-4 mr-2" />
-              {{ item.name }}
-            </router-link>
-          </div>
+  <aside
+    class="w-[280px] bg-white/95 backdrop-blur-xl border-r border-white/20 pt-8 flex flex-col h-screen"
+  >
+    <!-- Logo -->
+    <div class="px-8 pb-8 border-b border-black/10 mb-8">
+      <Logo class="w-full" />
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 px-4">
+      <router-link
+        v-for="item in navItems"
+        :key="item.name"
+        :to="item.href"
+        class="flex items-center p-4 my-1 rounded-xl text-gray-500 transition-all duration-300 hover:bg-indigo-100 hover:text-indigo-600 active-nav-item"
+        active-class="bg-indigo-100 text-indigo-600 translate-x-1"
+      >
+        <component :is="item.icon" class="w-5 h-5 mr-3" />
+        {{ item.name }}
+      </router-link>
+    </nav>
+
+    <!-- Profile Section -->
+    <div class="flex flex-col gap-4 px-8 py-4 border-t border-black/10">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-semibold flex items-center justify-center"
+        >
+          {{ userInitials }}
         </div>
-        
-        <div class="flex items-center space-x-4">
-          <span class="text-sm text-gray-700">
+        <div>
+          <div class="font-semibold text-sm">
             {{ user?.profile.firstName }} {{ user?.profile.lastName }}
-          </span>
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          </div>
+          <div class="text-gray-500 text-xs">
             {{ user?.role === 'admin' ? 'Administrateur' : 'Étudiant' }}
-          </span>
-          <button
-            @click="handleSignOut"
-            class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-gray-700 hover:text-red-600 hover:bg-red-50 transition-colors"
-          >
-            Déconnexion
-          </button>
+          </div>
         </div>
       </div>
+      <button
+        @click="handleSignOut"
+        class="inline-flex items-center justify-center px-3 py-1.5 border border-red-100 text-sm font-medium rounded-md text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+      >
+        Déconnexion
+      </button>
     </div>
-  </nav>
+  </aside>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
-import { 
-  HomeIcon, 
-  UserIcon, 
-  DocumentTextIcon, 
+import {
+  HomeIcon,
+  UserIcon,
+  DocumentTextIcon,
   ChartBarIcon,
   UsersIcon,
-  CogIcon
-} from '@heroicons/vue/24/outline'
+  CogIcon,
+} from '@heroicons/vue/24/solid'
+import Logo from '../../assets/logo.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
 const user = computed(() => authStore.user)
+
+const userInitials = computed(() => {
+  if (!user.value?.profile) return ''
+  const { firstName, lastName } = user.value.profile
+  return `${firstName?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase()
+})
 
 const studentNavItems = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
@@ -80,3 +96,8 @@ const handleSignOut = async () => {
   router.push('/login')
 }
 </script>
+<style scoped>
+.active-nav-item.router-link-exact-active {
+  transform: translateX(4px);
+}
+</style>

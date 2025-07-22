@@ -42,11 +42,11 @@ const handleClick = () => {
 }
 
 const buttonClasses = computed(() => {
-  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
+  const baseClasses = 'flex items-center justify-center font-medium gap-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
   
   const variantClasses = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500',
+    primary: 'btn-primary bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+    secondary: 'btn-secondary bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
     outline: 'border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500'
   }
@@ -60,3 +60,31 @@ const buttonClasses = computed(() => {
   return `${baseClasses} ${variantClasses[props.variant]} ${sizeClasses[props.size]}`
 })
 </script>
+<style scoped>
+.btn-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  text-align: center;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+}
+
+.btn-secondary {
+  background: rgba(107, 114, 128, 0.1);
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: rgba(107, 114, 128, 0.2);
+}
+</style>

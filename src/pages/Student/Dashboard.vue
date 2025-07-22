@@ -1,13 +1,16 @@
 <template>
   <div class="space-y-6">
-    <div class="mb-8">
-      <h1 class="text-2xl font-bold text-gray-900">
-        Bonjour {{ user?.profile.firstName }} !
-      </h1>
-      <p class="text-gray-600">
-        Voici un résumé de votre parcours et de vos recommandations d'orientation.
-      </p>
-    </div>
+    <TitlePage 
+      :has-button="true" 
+      :has-icon="true"
+      @on-click="generateAIAnalysis" 
+      btn-text="Analyser mon profil avec l'IA" 
+      :loading="loading" 
+      description="Voici un résumé de votre parcours et de vos recommandations d'orientation." 
+      :user="user"
+    >
+      <SparklesIcon class="h-6 w-6 text-white" />
+    </TitlePage>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -113,23 +116,50 @@
         <h3 class="text-lg font-medium text-gray-900 mb-4">
           Progression annuelle
         </h3>
-        <div class="h-64">
+        <div class="">
           <Line :data="chartData" :options="chartOptions" />
         </div>
       </Card>
     </div>
 
     <!-- Action Buttons -->
-    <div class="flex flex-wrap gap-4">
-      <Button @click="generateAIAnalysis" :disabled="loading">
-        {{ loading ? 'Génération...' : 'Analyser mon profil avec l\'IA' }}
-      </Button>
-      <Button variant="outline">
-        Mettre à jour mon profil
-      </Button>
-      <Button variant="outline">
-        Télécharger/Mettre à jour bulletin
-      </Button>
+    <div class="flex flex-wrap gap-4 actions-grid">
+        <div class="action-card">
+          <div class="action-header">
+              <div class="action-icon" style="background: rgba(139, 69, 19, 0.1); color: #8b4513;">🤖</div>
+              <div>
+                  <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem;">Générer une recommandation</h3>
+                  <p style="color: #6b7280; font-size: 0.9rem;">Obtenez des suggestions d'orientation personnalisées basées sur vos résultats.</p>
+              </div>
+          </div>
+          <Button @click="generateAIAnalysis" :disabled="loading">
+            {{ loading ? 'Génération...' : 'Analyser mon profil avec l\'IA' }}
+          </Button>
+      </div>
+      <div class="action-card">
+          <div class="action-header">
+              <div class="action-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">📝</div>
+              <div>
+                  <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem;">Compléter mon profil</h3>
+                  <p style="color: #6b7280; font-size: 0.9rem;">Ajoutez vos aspirations et centres d'intérêt pour des recommandations plus précises.</p>
+              </div>
+          </div>
+          <Button variant="secondary">
+            Mettre à jour mon profil
+        </Button>
+      </div>
+      <div class="action-card">
+          <div class="action-header">
+              <div class="action-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">📋</div>
+              <div>
+                  <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem;">Mettre à jour mes bulletins</h3>
+                  <p style="color: #6b7280; font-size: 0.9rem;">Ajoutez vos dernières notes pour améliorer la précision des analyses.</p>
+              </div>
+          </div>
+          <Button variant="secondary">
+            Télécharger/Mettre à jour bulletin
+        </Button>
+      </div>
     </div>
   </div>
 </template>
@@ -139,8 +169,11 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { FirebaseService } from '../../services/firebaseService'
 import { OrientationService } from '../../services/orientationService'
+
 import Card from '../../components/UI/Card.vue'
 import Button from '../../components/UI/Button.vue'
+import TitlePage from '../../components/UI/Title.vue'
+
 import { ChartBarIcon, UserIcon, DocumentTextIcon, SparklesIcon } from '@heroicons/vue/24/outline'
 import { Line } from 'vue-chartjs'
 import {
@@ -264,3 +297,42 @@ onMounted(() => {
   loadBulletins()
 })
 </script>
+<style scoped>
+/* Action Cards */
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.action-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.action-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>

@@ -1,7 +1,10 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="h-screen bg-gray-50 flex overflow-hidden">
+    <!-- Sidebar (fixed size, not scrollable) -->
     <Navigation />
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+
+    <!-- Main content (scrollable) -->
+    <main class="flex-1 overflow-y-auto py-6 sm:px-6 lg:px-8">
       <router-view />
     </main>
   </div>
@@ -12,6 +15,4 @@ import Navigation from './Navigation.vue'
 import { useAuthStore } from '../../stores/auth'
 
 const authStore = useAuthStore()
-
-// Loading state handled by router guards
 </script>

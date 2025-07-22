@@ -1,43 +1,54 @@
 <template>
   <div class="space-y-6">
-    <div class="flex justify-between items-center">
-      <h1 class="text-2xl font-bold text-gray-900">Gestion des Utilisateurs</h1>
-      <Button @click="showAddForm = true">
-        <PlusIcon class="h-4 w-4 mr-2" />
-        Ajouter un étudiant
-      </Button>
-    </div>
+    <TitlePage 
+      :has-button="true" 
+      :has-icon="true"
+      @on-click="showAddForm = true" 
+      title="Gestion des Utilisateurs"
+      btn-text="Ajouter un étudiant" 
+      :loading="loading" 
+      description="Voici un résumé de votre parcours et de vos recommandations d'orientation." 
+      :user="user"
+    >
+      <PlusIcon class="h-4 w-4 mr-2" />
+    </TitlePage>
 
     <!-- Filters -->
     <Card>
-      <div class="flex items-center space-x-4">
-        <label class="text-sm font-medium text-gray-700">Filtrer par classe :</label>
-        <select
-          v-model="selectedClass"
-          class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-        >
-          <option value="all">Toutes les classes</option>
-          <option v-for="className in uniqueClasses" :key="className" :value="className">
-            {{ className }}
-          </option>
-        </select>
-        <div class="ml-auto text-sm text-gray-600">
-          {{ filteredStudents.length }} étudiant(s) affiché(s)
+      <div class="flex items-center justify-between space-x-4">
+        <div class="flex items-center space-x-4">
+          <label class="text-sm font-medium text-gray-700">Filtrer par classe :</label>
+          <select v-model="selectedClass"
+            class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            <option value="all">Toutes les classes</option>
+            <option v-for="className in uniqueClasses" :key="className" :value="className">
+              {{ className }}
+            </option>
+          </select>
+          <div class="ml-auto text-sm text-gray-600">
+            {{ filteredStudents.length }} étudiant(s) affiché(s)
+          </div>
+        </div>
+        <!-- Toggle View Icons -->
+        <div class="flex items-center gap-4">
+          <button @click="viewMode = 'card'" :class="viewMode === 'card' ? 'text-blue-600' : 'text-gray-400'">
+            <Squares2X2Icon class="w-5 h-5" />
+          </button>
+          <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'text-blue-600' : 'text-gray-400'">
+            <Bars3Icon class="w-5 h-5" />
+          </button>
         </div>
       </div>
     </Card>
 
     <!-- Add Student Form -->
     <Card v-if="showAddForm">
-      <AddStudentForm
-        @submit="handleAddStudent"
-        @cancel="showAddForm = false"
-        :generate-code="generateRegistrationCode"
-      />
+      <AddStudentForm @submit="handleAddStudent" @cancel="showAddForm = false"
+        :generate-code="generateRegistrationCode" />
     </Card>
 
-    <!-- Students List -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Card View -->
+    <div v-if="viewMode === 'card'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <Card v-for="student in filteredStudents" :key="student.id">
         <div class="flex justify-between items-start mb-4">
           <div>
@@ -92,6 +103,39 @@
       </Card>
     </div>
 
+    <!-- List View -->
+    <!-- List View -->
+    <Card v-if="viewMode === 'list'" class="overflow-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-4 py-2 text-left font-medium text-gray-700">Nom</th>
+            <th class="px-4 py-2 text-left font-medium text-gray-700">Email</th>
+            <th class="px-4 py-2 text-left font-medium text-gray-700">Classe</th>
+            <th class="px-4 py-2 text-left font-medium text-gray-700">Moyenne</th>
+            <th class="px-4 py-2 text-left font-medium text-gray-700">Inscription</th>
+            <th class="px-4 py-2 text-left font-medium text-gray-700">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 bg-white">
+          <tr v-for="student in filteredStudents" :key="student.id">
+            <td class="px-4 py-2">
+              {{ student.profile.firstName }} {{ student.profile.lastName }}
+            </td>
+            <td class="px-4 py-2">{{ student.email }}</td>
+            <td class="px-4 py-2">{{ student.profile.class }}</td>
+            <td class="px-4 py-2">{{ student.profile.averageGrade || 'N/A' }}/20</td>
+            <td class="px-4 py-2">{{ formatDate(student.createdAt) }}</td>
+            <td class="px-4 py-2 space-x-2 flex items-center gap-1">
+              <Button variant="secondary" size="sm">Voir</Button>
+              <Button size="sm" variant="outline">Éditer</Button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </Card>
+
+
     <!-- Empty State -->
     <Card v-if="filteredStudents.length === 0 && !loading">
       <div class="text-center py-12">
@@ -99,7 +143,7 @@
           Aucun étudiant trouvé
         </h3>
         <p class="text-gray-600">
-          {{ selectedClass === 'all' 
+          {{ selectedClass === 'all'
             ? "Aucun étudiant n'a été ajouté pour le moment."
             : `Aucun étudiant dans la classe ${selectedClass}.`
           }}
@@ -114,17 +158,20 @@ import { ref, computed, onMounted } from 'vue'
 import { FirebaseService } from '../../services/firebaseService'
 import Card from '../../components/UI/Card.vue'
 import Button from '../../components/UI/Button.vue'
-import { PlusIcon, PencilIcon, TrashIcon, KeyIcon } from '@heroicons/vue/24/outline'
 import AddStudentForm from './AddStudentForm.vue'
+import TitlePage from '../../components/UI/Title.vue'
 
+import { Squares2X2Icon, Bars3Icon, PlusIcon, PencilIcon, TrashIcon, KeyIcon } from '@heroicons/vue/24/outline'
+
+const viewMode = ref('card')
 const students = ref([])
 const showAddForm = ref(false)
 const loading = ref(true)
 const selectedClass = ref('all')
 
 const filteredStudents = computed(() => {
-  return selectedClass.value === 'all' 
-    ? students.value 
+  return selectedClass.value === 'all'
+    ? students.value
     : students.value.filter(student => student.profile.class === selectedClass.value)
 })
 

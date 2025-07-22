@@ -108,7 +108,7 @@
         <h3 class="text-lg font-medium text-gray-900 mb-4">
           Moyennes par niveau
         </h3>
-        <div class="h-64">
+        <div class="">
           <canvas ref="chartCanvas"></canvas>
         </div>
       </Card>
