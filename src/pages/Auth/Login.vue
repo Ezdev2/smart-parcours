@@ -1,9 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
-      <h2 class="mt-6 text-center text-3xl font-bold text-gray-900">
-        SmartParcours
-      </h2>
+      <Logo class="w-full" />
       <p class="mt-2 text-center text-sm text-gray-600">
         Connexion à votre compte
       </p>
@@ -11,11 +9,13 @@
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
       <Card>
-        <form class="space-y-6" @submit.prevent="handleSubmit">
+        <h2 class="text-center text-3xl font-bold text-gray-900">
+          Connexion
+        </h2>
+        <form class="space-y-6 py-8" @submit.prevent="handleSubmit">
           <div v-if="authStore.error" class="rounded-md bg-red-50 p-4">
             <div class="text-sm text-red-800">{{ authStore.error }}</div>
           </div>
-
           <div>
             <label for="email" class="block text-sm font-medium text-gray-700">
               Email
@@ -60,7 +60,7 @@
             </Button>
           </div>
 
-          <div class="mt-6">
+          <!-- <div class="mt-6">
             <div class="text-sm text-gray-600">
               <strong>Comptes de démonstration :</strong>
             </div>
@@ -74,7 +74,7 @@
                 <div>direction@test.com / adminsecure</div>
               </div>
             </div>
-          </div>
+          </div> -->
         </form>
       </Card>
     </div>
@@ -87,6 +87,8 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import Button from '../../components/UI/Button.vue'
 import Card from '../../components/UI/Card.vue'
+
+import Logo from '../../assets/logo.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
