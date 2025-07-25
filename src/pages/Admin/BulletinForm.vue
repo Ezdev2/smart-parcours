@@ -147,6 +147,9 @@
               </div>
             </div>
           </div>
+          <Button class="mt-6" type="button" @click="addSubject" size="sm" variant="secondary">
+              <PlusIcon class="h-4 w-4 mr-1" /> Ajouter une matière
+          </Button>
         </div>
 
         <div class="flex justify-end space-x-3 mt-6">
