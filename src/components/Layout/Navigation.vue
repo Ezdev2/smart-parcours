@@ -83,7 +83,7 @@ const studentNavItems = [
 const adminNavItems = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
   { name: 'Gestion Utilisateurs', href: '/admin/users', icon: UsersIcon },
-  { name: 'Rapports', href: '/admin/reports', icon: DocumentTextIcon },
+  // { name: 'Rapports', href: '/admin/reports', icon: DocumentTextIcon },
   { name: 'Paramètres', href: '/admin/settings', icon: CogIcon },
 ]
 
