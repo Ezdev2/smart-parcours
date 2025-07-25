@@ -1,7 +1,7 @@
 export class OrientationService {
   static OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
   static DEEPSEEK_MODEL = 'deepseek/deepseek-chat'
-  static MAX_WEEKLY_RECOMMENDATIONS = 3
+  static MAX_WEEKLY_RECOMMENDATIONS = 5
 
   // Define the list of academic profiles for the AI
   static ACADEMIC_PROFILES = [
