@@ -160,6 +160,14 @@ const generateNewRecommendation = async () => {
       throw new Error("Profil étudiant non trouvé.");
     }
 
+    // Récupérer les informations de la classe actuelle de l'étudiant
+  if (studentProfile.profile?.class) {
+    const currentClassInfo = await FirebaseService.getClassById(studentProfile.profile.class);
+    if (currentClassInfo) {
+      studentProfile.profile.classDisplayName = currentClassInfo.name;
+    }
+  }
+
     const bulletins = await FirebaseService.getBulletinsByStudent(user.value.id);
     // Fetch classes data to include class names in bulletin prompt
     const allClasses = await FirebaseService.getAllClasses();

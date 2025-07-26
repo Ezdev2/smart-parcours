@@ -106,6 +106,7 @@ COLLECTIONS PRINCIPALES :
      - logoUrl: string
      - classes: array<object>
      - subjects: array<object> 
+     - teachers: array<object> 
      - createdAt: timestamp
      - updatedAt: timestamp
 */
@@ -262,8 +263,9 @@ const exampleSettings = {
   name: "Lycée Jean Jaurès",
   admin: "adminId"
   academicYear: "2024-2025",
-  classes: ["premiere-s-2024", "terminale-l-2024", "seconde-a-2024"],
-  subjects: ["MATH", "PC"],
+  classes: [],
+  teachers: [],
+  subjects: [],
   themeColor: "#003366",
   logoUrl: "https://logoipsum.com/artwork/377"
 }

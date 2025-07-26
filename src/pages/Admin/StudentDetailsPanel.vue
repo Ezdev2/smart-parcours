@@ -41,8 +41,8 @@
               <p><strong>Nom complet:</strong> {{ student.profile.firstName }} {{ student.profile.lastName }}</p>
               <p><strong>Email:</strong> {{ student.email }}</p>
               <p><strong>Date de naissance:</strong> {{ formatDate(student.profile.dateOfBirth) }}</p>
-              <p><strong>Classe actuelle:</strong> {{ student.profile.classDisplayName }}</p> <p><strong>Moyenne générale (bulletin):</strong> {{ student.profile.averageGrade || 'N/A' }}/20</p>
-              <p><strong>Moyenne générale (globale):</strong> {{ student.profile.overallAverage !== undefined && student.profile.overallAverage !== null ? `${student.profile.overallAverage}/20` : 'N/A' }}</p>
+              <p><strong>Classe actuelle:</strong> {{ student.profile.classDisplayName }}</p> 
+              <p><strong>Moyenne générale:</strong> {{ student.profile.averageGrade || 'N/A' }}/20</p>
               <p><strong>Niveau:</strong> {{ student.profile.level || 'Non défini' }}</p>
               <p><strong>Code d'inscription:</strong> <span class="font-mono bg-gray-100 px-1 rounded">{{ student.profile.registrationCode }}</span></p>
               <p><strong>Inscrit le:</strong> {{ formatDate(student.createdAt) }}</p>
