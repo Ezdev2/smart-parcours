@@ -27,7 +27,7 @@ export class OrientationService {
     prompt += `Âge: ${age} ans\n`;
     prompt += `Niveau scolaire actuel: ${profile.level}\n`;
     prompt += `Classe actuelle: ${profile.classDisplayName || profile.class}\n`;
-    prompt += `Moyenne générale actuelle: ${profile.overallAverage !== undefined && profile.overallAverage !== null ? profile.overallAverage : profile.averageGrade || 'non renseignée'}/20\n\n`;
+    prompt += `Moyenne générale actuelle: ${profile.averageGrade || 'non renseignée'}/20\n\n`;
 
     if (profile.filieres && profile.filieres.length > 0) {
       prompt += `Filières d'intérêt exprimées: ${profile.filieres.join(', ')}\n`;
@@ -39,7 +39,7 @@ export class OrientationService {
     if (bulletins && bulletins.length > 0) {
       prompt += `--- RÉSULTATS SCOLAIRES DÉTAILLÉS (TOUS BULLETINS DISPONIBLES) ---\n`;
       bulletins.forEach((bulletin, bIndex) => {
-        prompt += `Bulletin ${bulletin.semester} (${bulletin.year}), Moyenne: ${bulletin.generalAverage || 'N/A'}/20, Commentaire Général: "${bulletin.generalComment || 'Aucun'}"\n`;
+        prompt += `Bulletin ${bulletin.semester} (${bulletin.year}), Classe: ${bulletin.classDisplayName || bulletin.classId}, Moyenne: ${bulletin.generalAverage || 'N/A'}/20, Commentaire Général: "${bulletin.generalComment || 'Aucun'}"\n`;
         prompt += `Matières:\n`;
         (bulletin.subjects || []).forEach(subject => {
           prompt += `- ${subject.name} (Coeff: ${subject.coefficient || 'N/A'}): Note ${subject.grade}/20, Appréciation: "${subject.comment || 'Aucune'}"\n`;

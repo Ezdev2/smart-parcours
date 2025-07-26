@@ -26,6 +26,7 @@ COLLECTIONS PRINCIPALES :
 2. bulletins/ (collection)
    - {bulletinId}/ (document - auto-generated)
      - studentId: string (référence vers users/{userId})
+     - classId: string
      - year: string
      - semester: string
      - subjects: array<object>

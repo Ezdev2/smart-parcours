@@ -161,6 +161,12 @@ const generateNewRecommendation = async () => {
     }
 
     const bulletins = await FirebaseService.getBulletinsByStudent(user.value.id);
+    // Fetch classes data to include class names in bulletin prompt
+    const allClasses = await FirebaseService.getAllClasses();
+    bulletins.forEach(bulletin => {
+        const classInfo = allClasses.find(c => c.id === bulletin.classId);
+        bulletin.classDisplayName = classInfo ? classInfo.name : 'Classe inconnue';
+    });
 
     const age = studentProfile.profile?.dateOfBirth
       ? (new Date().getFullYear() - new Date(studentProfile.profile.dateOfBirth).getFullYear())

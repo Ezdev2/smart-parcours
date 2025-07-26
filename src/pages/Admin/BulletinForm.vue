@@ -23,10 +23,21 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">Professeur Principal</label>
+          <label class="block text-sm font-medium text-gray-700">Classe du bulletin</label>
+          <select v-model="formData.classId" required
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            <option value="">Sélectionner une classe</option>
+            <option v-for="classe in availableClassesForBulletin" :key="classe.id" :value="classe.id">
+              {{ classe.name }} ({{ classe.level }})
+            </option>
+          </select>
+          <p class="mt-1 text-xs text-gray-500">La classe associée à ce bulletin spécifique.</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Proviseur</label>
           <input type="text" :value="adminFullName" readonly
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 text-gray-700" />
-          <p class="mt-1 text-xs text-gray-500">Nom de l'administrateur connecté.</p>
+          <p class="mt-1 text-xs text-gray-500">Nom du proviseur</p>
         </div>
 
         <div>
@@ -194,21 +205,21 @@ const formData = reactive({
   generalComment: '',
   professeurPrincipal: null, // This will be managed by admin's full name
   absencesComment: null,
+  classId: null, // <<< NEW: Add classId to formData >>>
   subjects: []
 });
 
 const availableSubjects = ref([]);
-const studentClassAndSchool = ref(null); // To store student's class and school for totalStudents calculation
+const availableClassesForBulletin = ref([]);
+const studentClassAndSchool = ref(null);
 
-// Computed property for admin's full name
 const adminFullName = computed(() => {
   if (authStore.user?.profile?.firstName && authStore.user?.profile?.lastName) {
     return `${authStore.user.profile.firstName} ${authStore.user.profile.lastName}`;
   }
-  return 'Non renseigné';
+  return '...';
 });
 
-// Computed property to calculate general average
 const calculatedGeneralAverage = computed(() => {
   let totalWeightedGrades = 0;
   let totalCoefficients = 0;
@@ -229,8 +240,27 @@ const calculatedGeneralAverage = computed(() => {
   return '';
 });
 
+// Load all classes from admin settings for the bulletin class dropdown
+const loadAvailableClassesForBulletin = async () => {
+    if (!authStore.user || !authStore.user.id) {
+        console.warn("Admin ID not available to load classes for bulletin.");
+        return;
+    }
+    try {
+        const adminSettings = await FirebaseService.getOrCreateSettingsForAdmin(authStore.user.id);
+        if (adminSettings && adminSettings.classes && adminSettings.classes.length > 0) {
+            const classPromises = adminSettings.classes.map(id => FirebaseService.getClassById(id));
+            const fetchedClasses = await Promise.all(classPromises);
+            availableClassesForBulletin.value = fetchedClasses.filter(cls => cls !== null);
+        } else {
+            availableClassesForBulletin.value = [];
+        }
+    } catch (error) {
+        console.error("Error loading available classes for bulletin:", error);
+        availableClassesForBulletin.value = [];
+    }
+};
 
-// Load student's class and school to calculate totalStudents
 const loadStudentClassAndSchool = async () => {
     try {
         const studentInfo = await FirebaseService.getUserById(props.studentId);
@@ -249,7 +279,6 @@ const loadStudentClassAndSchool = async () => {
     }
 };
 
-// Load available subjects from admin settings
 const loadAvailableSubjects = async () => {
   if (!authStore.user || !authStore.user.id) {
     console.warn("Admin ID not available to load subjects from settings.");
@@ -270,26 +299,23 @@ const loadAvailableSubjects = async () => {
   }
 };
 
-// Watch for initialData changes to populate the form (for edit mode)
 watch(() => props.initialData, async (newVal) => {
-  await loadAvailableSubjects(); // Load subjects first
-  await loadStudentClassAndSchool(); // Load student's class/school for totalStudents
+  await loadAvailableSubjects();
+  await loadAvailableClassesForBulletin(); // <<< NEW: Load classes for bulletin form >>>
+  await loadStudentClassAndSchool();
 
-  // Pre-fill professeurPrincipal with admin's name if creating a new bulletin,
-  // or use existing value if editing.
-  // Note: if initialData.professeurPrincipal is null but adminFullName is available, use adminFullName.
-  // Otherwise, use initialData.professeurPrincipal.
   formData.professeurPrincipal = newVal?.professeurPrincipal || adminFullName.value;
-
 
   if (newVal) {
     formData.year = newVal.year || new Date().getFullYear().toString();
     formData.semester = newVal.semester || '';
-    formData.generalAverage = newVal.generalAverage || null; // Will be overridden by calculated average on submit
+    formData.generalAverage = newVal.generalAverage || null;
     formData.classRank = newVal.classRank || null;
-    formData.totalStudents = newVal.totalStudents || null; // Existing value if any
+    formData.totalStudents = newVal.totalStudents || null;
     formData.generalComment = newVal.generalComment || '';
+    formData.professeurPrincipal = newVal.professeurPrincipal || adminFullName.value;
     formData.absencesComment = newVal.absencesComment || null;
+    formData.classId = newVal.classId || null; // <<< NEW: Populate classId >>>
     formData.subjects = newVal.subjects ? newVal.subjects.map(sub => ({
       ...sub,
       coefficient: typeof sub.coefficient === 'string' ? parseFloat(sub.coefficient) : sub.coefficient,
@@ -297,33 +323,30 @@ watch(() => props.initialData, async (newVal) => {
       highestGrade: sub.highestGrade || null
     })) : [];
   } else {
-    // Reset for new bulletin (add mode)
     formData.year = new Date().getFullYear().toString();
     formData.semester = '';
-    formData.generalAverage = null; // Will be calculated on submit
+    formData.generalAverage = null;
     formData.classRank = null;
-    formData.totalStudents = null; // Will be calculated on submit
+    formData.totalStudents = null;
     formData.generalComment = '';
+    formData.professeurPrincipal = adminFullName.value; // For new bulletins, default to current admin
     formData.absencesComment = null;
+    // For new bulletins, try to pre-select student's current class if available
+    formData.classId = studentClassAndSchool.value ? studentClassAndSchool.value.classId : null; // <<< NEW: Pre-select current class >>>
     formData.subjects = [];
   }
 }, { immediate: true });
 
-
-// Watch for selected subject name to auto-fill coefficient, classAverage, highestGrade
 watch(formData.subjects, (newSubjects) => {
   newSubjects.forEach(subject => {
     const selectedSubjectFromSettings = availableSubjects.value.find(s => s.name === subject.name);
     
-    // Auto-fill coefficient if selected and not manually set
     if (selectedSubjectFromSettings && (subject.coefficient === null || isNaN(subject.coefficient))) {
       subject.coefficient = selectedSubjectFromSettings.coefficient;
     }
-    // No auto-fill for classAverage and highestGrade from subject settings as they are specific to a bulletin.
   });
 }, { deep: true });
 
-// Also watch for studentClassAndSchool to trigger totalStudents calculation when it's available
 watch(studentClassAndSchool, async (newVal) => {
     if (newVal) {
         formData.totalStudents = await FirebaseService.getStudentCountInClass(
@@ -333,7 +356,7 @@ watch(studentClassAndSchool, async (newVal) => {
     } else {
         formData.totalStudents = null;
     }
-}, { immediate: true }); // Run immediately if studentClassAndSchool is already set
+}, { immediate: true });
 
 const addSubject = () => {
   formData.subjects.push({
@@ -353,7 +376,11 @@ const removeSubject = (index) => {
 
 const handleSubmit = async () => {
   try {
-    // Re-calculate totalStudents right before submission to ensure it's up-to-date
+    if (!formData.classId) {
+        alert("Veuillez sélectionner une classe pour ce bulletin.");
+        return;
+    }
+
     if (studentClassAndSchool.value) {
         formData.totalStudents = await FirebaseService.getStudentCountInClass(
             studentClassAndSchool.value.classId,
@@ -363,20 +390,18 @@ const handleSubmit = async () => {
         formData.totalStudents = null;
     }
 
-    // Assign the calculated general average to formData before sending
-    // Ensure it's a number, convert 'N/A' to null if applicable
-    formData.generalAverage = calculatedGeneralAverage.value !== 'N/A' ? parseFloat(calculatedGeneralAverage.value) : null;
-
+    formData.generalAverage = calculatedGeneralAverage.value !== '' ? parseFloat(calculatedGeneralAverage.value) : null;
 
     const bulletinPayload = {
       studentId: props.studentId,
+      classId: formData.classId,
       year: formData.year,
       semester: formData.semester,
-      generalAverage: formData.generalAverage, // Now correctly populated
+      generalAverage: formData.generalAverage,
       classRank: formData.classRank,
-      totalStudents: formData.totalStudents, // Now correctly populated
+      totalStudents: formData.totalStudents,
       generalComment: formData.generalComment,
-      professeurPrincipalName: formData.professeurPrincipal, // Pass the name
+      professeurPrincipalName: formData.professeurPrincipal,
       absencesComment: formData.absencesComment,
       subjects: formData.subjects.filter(s => s.name && s.grade !== null && s.coefficient !== null).map(s => ({
         ...s,

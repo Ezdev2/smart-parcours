@@ -5,7 +5,7 @@
         Bulletin de Notes : {{ bulletin?.semester }} ({{ bulletin?.year }}) - {{ student?.profile?.firstName }} {{ student?.profile?.lastName }}
       </h2>
       <div class="flex space-x-2">
-        <Button variant="outline" @click="handleEditBulletin" :disabled="loading || !bulletin">
+        <Button v-if="!hideEditButton" variant="outline" @click="handleEditBulletin" :disabled="loading || !bulletin">
           <PencilIcon class="h-4 w-4 mr-2" /> Modifier
         </Button>
         <Button variant="primary" @click="downloadBulletinPdf" :disabled="loading || !bulletin">
@@ -38,7 +38,7 @@
             <div class="mb-6 text-gray-700">
             <div>
                 <p><strong>Année scolaire :</strong> {{ bulletin.year }}</p>
-                <p><strong>Classe :</strong> {{ student?.profile?.classDisplayName }}</p>
+                <p><strong>Classe :</strong> {{ getClassNameById(bulletin.classId) }}</p>
                 <p><strong>Professeur Principal :</strong> <span class="italic">{{ bulletin.professeurPrincipal || 'Non renseigné' }}</span></p>
             </div>
             </div>
@@ -125,6 +125,10 @@ const props = defineProps({
   studentId: { // Needed to fetch student details for the template
     type: String,
     required: true
+  },
+  hideEditButton: { // New prop to control edit button visibility
+    type: Boolean,
+    default: false
   }
 });
 
@@ -140,6 +144,7 @@ const student = ref(null);
 const schoolName = ref('');
 const loading = ref(true);
 const error = ref(null);
+const availableClasses = ref([]);
 
 const formatDate = (dateValue) => {
   if (!dateValue) return "Non renseignée";
@@ -154,6 +159,12 @@ const formatDate = (dateValue) => {
     return "Non renseignée";
   }
   return date.toLocaleDateString("fr-FR");
+};
+
+// NEW: Helper function to get class name from ID
+const getClassNameById = (classId) => {
+  const classe = availableClasses.value.find(c => c.id === classId);
+  return classe ? classe.name : 'Classe inconnue';
 };
 
 const loadBulletinAndStudent = async () => {
@@ -177,6 +188,10 @@ const loadBulletinAndStudent = async () => {
       return;
     }
     student.value = fetchedStudent;
+    
+    // Fetch ALL classes to map classIds to names
+    const allClasses = await FirebaseService.getAllClasses();
+    availableClasses.value = allClasses;
 
     // Fetch Admin Settings (School Information)
     if (student.value.profile?.school) {
@@ -189,23 +204,16 @@ const loadBulletinAndStudent = async () => {
     } else {
         schoolName.value = 'Nom de l\'Établissement';
     }
-    
-    // Ensure class display name is available for the template
-    if (student.value.profile?.class) {
-      const classInfo = await FirebaseService.getClassById(student.value.profile.class);
-      student.value.profile.classDisplayName = classInfo ? classInfo.name : student.value.profile.class;
-    }
 
     // Calculate totalStudents if not already present in bulletin data
-    if (!bulletin.value.totalStudents && student.value.profile.class && student.value.profile.school) {
+    // This calculation should now use bulletin.classId if available for historical accuracy
+    if (!bulletin.value.totalStudents && bulletin.value.classId && student.value.profile?.school) {
         const totalStudentsInClass = await FirebaseService.getStudentCountInClass(
-            student.value.profile.class,
+            bulletin.value.classId, // Use bulletin's classId
             student.value.profile.school
         );
-        // Update the bulletin ref directly, this won't persist to Firestore unless saved
         bulletin.value.totalStudents = totalStudentsInClass;
     }
-
 
   } catch (err) {
     console.error("Error loading bulletin or student:", err);
@@ -221,7 +229,7 @@ const handleEditBulletin = () => {
 
 const downloadBulletinPdf = async () => {
     try {
-        const element = document.querySelector('.bulletin-template'); // Select the element to print
+        const element = document.querySelector('.bulletin-template');
         if (!element) {
             showAlert('Erreur', 'Contenu du bulletin introuvable pour la génération PDF.', 'Ok');
             return;
@@ -235,8 +243,7 @@ const downloadBulletinPdf = async () => {
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // Use a slight delay to ensure all content is rendered correctly before PDF generation
-        await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
+        await new Promise(resolve => setTimeout(resolve, 100));
 
         html2pdf().from(element).set(options).save();
         showAlert('Succès', 'Le bulletin PDF est en cours de téléchargement.', 'Ok');
@@ -257,12 +264,11 @@ onMounted(() => {
 
 <style scoped>
 .bulletin-template {
-  max-width: 210mm; /* A4 width */
-  /* min-height: 297mm;  */
+  max-width: 210mm;
+  /* min-height: 297mm; */
   /* box-shadow: 0 0 10px rgba(0,0,0,0.1); */
 }
 
-/* Ensure table borders are visible for printing */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -270,17 +276,17 @@ table {
 
 th, td {
   padding: 8px;
-  border: 1px solid #d1d5db; /* Tailwind gray-300 */
+  border: 1px solid #d1d5db;
 }
 
 thead th {
-  background-color: #f3f4f6; /* Tailwind gray-100 */
+  background-color: #f3f4f6;
   font-weight: 600;
   text-align: left;
 }
 
 tfoot td {
-  background-color: #f9fafb; /* Tailwind gray-50 */
+  background-color: #f9fafb;
 }
 
 @media print {

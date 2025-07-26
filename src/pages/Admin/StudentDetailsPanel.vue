@@ -41,8 +41,8 @@
               <p><strong>Nom complet:</strong> {{ student.profile.firstName }} {{ student.profile.lastName }}</p>
               <p><strong>Email:</strong> {{ student.email }}</p>
               <p><strong>Date de naissance:</strong> {{ formatDate(student.profile.dateOfBirth) }}</p>
-              <p><strong>Classe:</strong> {{ student.profile.classDisplayName }}</p>
-              <p><strong>Moyenne générale:</strong> {{ student.profile.averageGrade || 'N/A' }}/20</p>
+              <p><strong>Classe actuelle:</strong> {{ student.profile.classDisplayName }}</p> <p><strong>Moyenne générale (bulletin):</strong> {{ student.profile.averageGrade || 'N/A' }}/20</p>
+              <p><strong>Moyenne générale (globale):</strong> {{ student.profile.overallAverage !== undefined && student.profile.overallAverage !== null ? `${student.profile.overallAverage}/20` : 'N/A' }}</p>
               <p><strong>Niveau:</strong> {{ student.profile.level || 'Non défini' }}</p>
               <p><strong>Code d'inscription:</strong> <span class="font-mono bg-gray-100 px-1 rounded">{{ student.profile.registrationCode }}</span></p>
               <p><strong>Inscrit le:</strong> {{ formatDate(student.createdAt) }}</p>
@@ -100,6 +100,7 @@
               <div>
                 <p class="font-medium text-gray-900">Bulletin {{ bulletin.semester }} ({{ bulletin.year }})</p>
                 <p class="text-sm text-gray-600">Moyenne: {{ bulletin.generalAverage || 'N/A' }}/20</p>
+                <p class="text-sm text-gray-600 mt-1">Classe: {{ getClassNameById(bulletin.classId) }}</p>
                 <p class="text-xs text-gray-500">Mis à jour: {{ formatDate(bulletin.updatedAt) }}</p>
               </div>
               <div class="flex space-x-2">
@@ -138,21 +139,21 @@
       :student-id="studentId"
       @submit="handleBulletinSubmit"
       @cancel="cancelBulletinForm"
-    />
+      :available-classes-for-bulletin="availableClasses" />
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, computed } from 'vue' // Import 'computed'
+import { ref, watch, onMounted, computed } from 'vue'
 import { FirebaseService } from '../../services/firebaseService'
 import Card from '../../components/UI/Card.vue'
 import Button from '../../components/UI/Button.vue'
 import BulletinForm from './BulletinForm.vue'
 import LoadingSpinner from '../../components/UI/LoadingSpinner.vue';
-import BulletinViewer from './BulletinViewer.vue'; // Make sure this path is correct
+import BulletinViewer from './BulletinViewer.vue';
 import { useConfirm } from '../../composables/useConfirm';
 
-import { PencilIcon, TrashIcon, PlusIcon, EyeIcon, ArrowUturnLeftIcon } from '@heroicons/vue/24/outline' // Add ArrowUturnLeftIcon
+import { PencilIcon, TrashIcon, PlusIcon, EyeIcon, ArrowUturnLeftIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
   studentId: {
@@ -180,17 +181,18 @@ const creatingBulletin = ref(false)
 
 const showBulletinFormModal = ref(false)
 const editingBulletinData = ref(null)
-const viewingBulletinId = ref(null); // Key ref to switch between views
+const viewingBulletinId = ref(null);
 
-const panelHasChanges = ref(false); // For unsaved changes in student details part
-const bulletinViewerHasChanges = ref(false); // For unsaved changes within the bulletin viewer (if it becomes editable)
+const panelHasChanges = ref(false);
+const bulletinViewerHasChanges = ref(false);
 
-// Computed property to determine if there are any unsaved changes in this panel
+// NEW: Ref to store all available classes for mapping bulletin.classId to name
+const availableClasses = ref([]);
+
 const hasChanges = computed(() => {
     return panelHasChanges.value || bulletinViewerHasChanges.value;
 });
 
-// Watch hasChanges and emit it to the parent
 watch(hasChanges, (newVal) => {
   emit('has-changes', newVal);
 });
@@ -211,6 +213,13 @@ const formatDate = (dateValue) => {
   return date.toLocaleDateString("fr-FR")
 }
 
+// NEW: Helper function to get class name from ID
+const getClassNameById = (classId) => {
+  const classe = availableClasses.value.find(c => c.id === classId);
+  return classe ? classe.name : 'Classe inconnue';
+};
+
+
 const loadStudentDetails = async () => {
   if (!props.studentId) {
     error.value = "ID étudiant manquant.";
@@ -223,15 +232,20 @@ const loadStudentDetails = async () => {
     const fetchedStudent = await FirebaseService.getUserById(props.studentId);
     if (fetchedStudent) {
       student.value = fetchedStudent;
+      // The student.profile.classDisplayName is for the student's current class
       if (student.value.profile.class) {
         const classInfo = await FirebaseService.getClassById(student.value.profile.class);
         student.value.profile.classDisplayName = classInfo ? classInfo.name : student.value.profile.class;
       }
-      bulletins.value = await FirebaseService.getBulletinsByStudent(props.studentId);
-      panelHasChanges.value = false; // Reset on load
-      bulletinViewerHasChanges.value = false; // Reset on load
 
-      // Call loadSchoolDetails after student details are loaded
+      // NEW: Fetch all classes for the getClassNameById helper
+      const allClasses = await FirebaseService.getAllClasses();
+      availableClasses.value = allClasses;
+
+      bulletins.value = await FirebaseService.getBulletinsByStudent(props.studentId);
+      panelHasChanges.value = false;
+      bulletinViewerHasChanges.value = false;
+
       await loadSchoolDetails();
 
     } else {
@@ -248,7 +262,6 @@ const loadStudentDetails = async () => {
 
 const loadSchoolDetails = async () => {
   try {
-    // Ensure student.value and student.value.profile.school exist before fetching settings
     if (student.value && student.value.profile?.school) {
         const adminSettings = await FirebaseService.getOrCreateSettingsForAdmin(student.value.profile.school);
         if (adminSettings) {
@@ -257,13 +270,11 @@ const loadSchoolDetails = async () => {
             schoolName.value = 'Nom de l\'Établissement';
         }
     } else {
-      schoolName.value = 'Nom de l\'Établissement'; // Default if no school ID is found
+      schoolName.value = 'Nom de l\'Établissement';
     }
   } catch (err) {
     console.error("Error loading school details:", err);
-    // You might want to set an error specifically for school details if needed,
-    // but avoid overwriting main 'error' for student details.
-    schoolName.value = 'Erreur de chargement'; // Indicate error
+    schoolName.value = 'Erreur de chargement';
   }
 }
 
@@ -296,19 +307,20 @@ const createNewBulletin = async () => {
   try {
     const newBulletinId = await FirebaseService.createBulletin({
       studentId: props.studentId,
+      classId: student.value && student.value.profile?.school,
       year: new Date().getFullYear().toString(),
       semester: `Nouveau Bulletin (${bulletins.value.length + 1})`,
       generalAverage: null,
-      notes: [], // Keeping this as empty as 'subjects' is used for detailed notes
+      notes: [],
       generalComment: "",
       classRank: null,
-      totalStudents: null, // Will be calculated by BulletinForm or on display
-      professeurPrincipal: null, // Will be set by BulletinForm
+      totalStudents: null,
+      professeurPrincipal: null,
       absencesComment: "",
       subjects: []
     });
     await showAlert('Succès', `Nouveau bulletin créé avec l'ID: ${newBulletinId}`, 'Ok');
-    await loadStudentDetails();
+    await loadStudentDetails(); // Reload to reflect the new empty bulletin
   } catch (err) {
     console.error("Error creating new bulletin:", err);
     await showAlert('Erreur', "Erreur lors de la création du bulletin: " + err.message, 'Compris');
@@ -317,13 +329,12 @@ const createNewBulletin = async () => {
   }
 };
 
-// Function to view a specific bulletin
 const viewBulletin = (bulletinId) => {
-  viewingBulletinId.value = bulletinId; // Set the ID to show the BulletinViewer
+  viewingBulletinId.value = bulletinId;
 };
 
-// Function to go back from BulletinViewer to the list of bulletins
-const cancelBulletinView = async () => {viewingBulletinId.value = null; // Hide the viewer, show the list of bulletins
+const cancelBulletinView = async () => {
+    viewingBulletinId.value = null;
     await loadStudentDetails(); 
 }
 
@@ -341,7 +352,6 @@ const editBulletin = async (bulletinId) => {
   }
 };
 
-// This is called from BulletinViewer when its "Modifier" button is clicked
 const openEditBulletinFromViewer = (bulletinData) => {
     editingBulletinData.value = bulletinData;
     showBulletinFormModal.value = true;
@@ -350,12 +360,10 @@ const openEditBulletinFromViewer = (bulletinData) => {
 const handleBulletinSubmit = async () => {
   await showAlert('Succès', 'Bulletin mis à jour avec succès !', 'Ok');
   showBulletinFormModal.value = false;
-  await loadStudentDetails(); // Refresh bulletins after save
-  // No need to reset viewingBulletinId, as the viewer should reflect updates
+  await loadStudentDetails();
 };
 
 const cancelBulletinForm = async () => {
-    // Optional: implement check for modifications for the bulletin form if you added change tracking there.
     showBulletinFormModal.value = false;
 };
 
@@ -380,13 +388,12 @@ const confirmDeleteBulletin = async (bulletinId) => {
 };
 
 const setBulletinViewerHasChanges = (hasChanges) => {
-    // BulletinViewer is view-only, so this will usually be false unless you add editable fields there.
     bulletinViewerHasChanges.value = hasChanges;
 };
 
 watch(() => props.studentId, loadStudentDetails, { immediate: true });
 
 onMounted(() => {
-  // loadSchoolDetails() is now called within loadStudentDetails
+  // loadStudentDetails handles initial data loading
 });
 </script>

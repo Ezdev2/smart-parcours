@@ -495,6 +495,8 @@ export class FirebaseService {
         ...doc.data(),
         uploadedAt: doc.data().uploadedAt?.toDate(),
         updatedAt: doc.data().updatedAt?.toDate(),
+        subjects: doc.data().subjects || [],
+        classId: doc.data().classId || null, // <<< NEW: Return classId >>>
       }));
     } catch (error) {
       console.error("Error getting bulletins:", error);
@@ -515,6 +517,8 @@ export class FirebaseService {
           ...data,
           uploadedAt: data.uploadedAt?.toDate(),
           updatedAt: data.updatedAt?.toDate(),
+          subjects: data.subjects || [],
+          classId: data.classId || null, // <<< NEW: Return classId >>>
         };
       }
       return null;
@@ -548,29 +552,27 @@ export class FirebaseService {
 
   /**
    * Créer un bulletin
-   * @param {Object} bulletinData - Les données du bulletin. Doit inclure `professeurPrincipalName`.
+   * @param {Object} bulletinData - Les données du bulletin. Doit inclure `classId` et `professeurPrincipalName`.
    */
   static async createBulletin(bulletinData) {
     try {
       const docRef = await addDoc(collection(firestore, "bulletins"), {
         studentId: bulletinData.studentId,
+        classId: bulletinData.classId,
         year: bulletinData.year || new Date().getFullYear().toString(),
         semester: bulletinData.semester || "Annuel",
-        generalAverage: bulletinData.generalAverage || null, // This is bulletin-specific average
+        generalAverage: bulletinData.generalAverage || null,
         generalComment: bulletinData.generalComment || "",
         classRank: bulletinData.classRank || null,
         totalStudents: bulletinData.totalStudents || null,
-        notes: [], // Keeping this as empty based on your example
+        notes: [],
         subjects: bulletinData.subjects || [],
-
         professeurPrincipal: bulletinData.professeurPrincipalName || null,
         absencesComment: bulletinData.absencesComment || "",
-
         uploadedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
 
-      // Créer une notification pour l'étudiant (existing logic)
       await this.createNotification(bulletinData.studentId, {
         type: "bulletin",
         title: "Nouveau bulletin disponible",
@@ -578,7 +580,6 @@ export class FirebaseService {
         relatedDocId: docRef.id,
       });
 
-      // After creating/updating a bulletin, recalculate and update overall student average
       await this.calculateAndUpdateStudentOverallAverage(bulletinData.studentId);
 
       return docRef.id;
@@ -591,27 +592,25 @@ export class FirebaseService {
   /**
    * Mettre à jour un bulletin
    * @param {string} bulletinId - L'ID du bulletin.
-   * @param {Object} bulletinData - Les données du bulletin. Doit inclure `professeurPrincipalName`.
+   * @param {Object} bulletinData - Les données du bulletin. Doit inclure `classId` et `professeurPrincipalName`.
    */
   static async updateBulletin(bulletinId, bulletinData) {
     try {
       const bulletinRef = doc(firestore, "bulletins", bulletinId);
       await updateDoc(bulletinRef, {
+        classId: bulletinData.classId,
         year: bulletinData.year,
         semester: bulletinData.semester,
-        generalAverage: bulletinData.generalAverage || null, // This is bulletin-specific average
+        generalAverage: bulletinData.generalAverage || null,
         generalComment: bulletinData.generalComment || "",
         classRank: bulletinData.classRank || null,
         totalStudents: bulletinData.totalStudents || null,
         subjects: bulletinData.subjects || [],
-
         professeurPrincipal: bulletinData.professeurPrincipalName || null,
         absencesComment: bulletinData.absencesComment || "",
-
         updatedAt: serverTimestamp(),
       });
 
-      // After creating/updating a bulletin, recalculate and update overall student average
       await this.calculateAndUpdateStudentOverallAverage(bulletinData.studentId);
 
       return true;
@@ -642,6 +641,36 @@ export class FirebaseService {
     } catch (error) {
       console.error("Error deleting bulletin:", error);
       throw error;
+    }
+  }
+
+    /**
+   * Obtenir le nombre d'étudiants dans une classe spécifique pour une école donnée.
+   * Cette fonction est essentielle pour le champ 'totalStudents' du bulletin.
+   * IMPORTANT: Ce calcul doit maintenant utiliser le classId stocké dans le bulletin,
+   * ou être adapté pour le nouveau contexte. Pour le contexte du bulletin,
+   * il devrait compter les étudiants ayant cette classe *à l'année académique du bulletin*.
+   * Pour l'instant, on se base sur la classe actuelle du profil étudiant, ce qui peut être inexact.
+   * Si vous voulez une précision historique, il faudrait stocker l'année académique dans le profil étudiant
+   * ou filtrer les étudiants qui étaient dans cette classe à cette année.
+   * Pour l'instant, nous utiliserons la classe actuelle du profil comme proxy.
+   * Si `totalStudents` est stocké directement dans le bulletin, cette fonction devient moins critique pour le bulletin lui-même
+   * et est surtout utile pour le formulaire.
+   */
+  static async getStudentCountInClass(classId, schoolId) {
+    try {
+      const q = query(
+        collection(firestore, "users"),
+        where("role", "==", "student"),
+        where("profile.class", "==", classId), // Assuming this still refers to the class ID for the count
+        where("profile.school", "==", schoolId),
+        where("isActive", "==", true)
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.size;
+    } catch (error) {
+      console.error("Error getting student count in class:", error);
+      return 0;
     }
   }
 

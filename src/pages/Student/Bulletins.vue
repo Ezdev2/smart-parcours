@@ -8,6 +8,7 @@
 
     <div v-else>
       <template v-if="!viewingBulletinId">
+
         <Card>
           <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4">
             <div class="flex items-center space-x-4 w-full sm:w-auto">
@@ -62,8 +63,7 @@
                   Mis à jour le {{ formatDate(bulletin.updatedAt) }}
                 </p>
                 <p class="text-sm text-gray-600 mt-1">
-                  Classe: {{ getClassNameById(bulletin.studentClassId) }}
-                </p>
+                  Classe: {{ getClassNameById(bulletin.classId) }} </p>
               </div>
               <div class="text-sm text-gray-600">
                 Moyenne: 
@@ -101,8 +101,7 @@
               <tr v-for="bulletin in filteredAndSortedBulletins" :key="bulletin.id">
                 <td class="px-4 py-2">{{ bulletin.semester }}</td>
                 <td class="px-4 py-2">{{ bulletin.year }}</td>
-                <td class="px-4 py-2">{{ getClassNameById(bulletin.studentClassId) }}</td>
-                <td class="px-4 py-2">{{ bulletin.generalAverage || 'N/A' }}/20</td>
+                <td class="px-4 py-2">{{ getClassNameById(bulletin.classId) }}</td> <td class="px-4 py-2">{{ bulletin.generalAverage || 'N/A' }}/20</td>
                 <td class="px-4 py-2">{{ formatDate(bulletin.updatedAt) }}</td>
                 <td class="px-4 py-2">
                   <Button variant="secondary" size="sm" @click="viewSingleBulletin(bulletin.id)">
@@ -156,7 +155,8 @@ const viewMode = ref('card'); // 'card' or 'list'
 
 // --- Computed Properties ---
 const availableClassesForFilter = computed(() => {
-  const uniqueClassIds = new Set(bulletins.value.map(b => b.studentClassId).filter(id => id));
+  // Now, collect unique classIds directly from bulletins
+  const uniqueClassIds = new Set(bulletins.value.map(b => b.classId).filter(id => id));
   return Array.from(uniqueClassIds).map(id => {
     const classInfo = availableClasses.value.find(c => c.id === id);
     return classInfo || { id: id, name: 'Classe Inconnue', level: '' };
@@ -168,7 +168,7 @@ const filteredAndSortedBulletins = computed(() => {
 
   // Filter by class
   if (filterClassId.value !== 'all') {
-    filtered = filtered.filter(b => b.studentClassId === filterClassId.value);
+    filtered = filtered.filter(b => b.classId === filterClassId.value); // Changed to b.classId
   }
 
   // Sort
@@ -211,21 +211,9 @@ const loadBulletinsAndClasses = async () => {
     const fetchedBulletins = await FirebaseService.getBulletinsByStudent(user.value.id);
     bulletins.value = fetchedBulletins;
 
-    // Fetch classes data for filtering
+    // Fetch ALL classes to map classIds to names for filtering and display
     const allClasses = await FirebaseService.getAllClasses();
     availableClasses.value = allClasses;
-
-    // Attach classId to each bulletin for easier filtering and display
-    // We also need student's current class to correctly display 'Classe' in list view.
-    const studentPromises = fetchedBulletins.map(b => FirebaseService.getUserById(b.studentId));
-    const studentsData = await Promise.all(studentPromises);
-
-    for (const bulletin of bulletins.value) {
-      const studentData = studentsData.find(s => s?.id === bulletin.studentId);
-      if (studentData && studentData.profile?.class) {
-        bulletin.studentClassId = studentData.profile.class;
-      }
-    }
 
   } catch (error) {
     console.error('Error loading bulletins or classes:', error);
@@ -251,8 +239,8 @@ const viewSingleBulletin = (bulletinId) => {
 };
 
 const cancelBulletinView = async () => {
-  viewingBulletinId.value = null;
-  await loadBulletinsAndClasses(); // Reload data when returning to list to reflect any changes
+    viewingBulletinId.value = null;
+    await loadBulletinsAndClasses(); // Reload data when returning to list to reflect any changes
 }
 
 // --- Lifecycle ---
