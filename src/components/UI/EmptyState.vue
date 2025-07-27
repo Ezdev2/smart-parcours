@@ -20,7 +20,7 @@ import Button from './Button.vue'
 
 defineProps({
     icon: {
-        type: Object,
+        type: Function,
         required: true
     },
     title: {

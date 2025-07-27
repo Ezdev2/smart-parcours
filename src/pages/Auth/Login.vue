@@ -100,10 +100,21 @@ const handleSubmit = async () => {
   try {
     const user = await authStore.signIn(email.value, password.value)
     // Redirect based on user role
-    if (user?.role === 'admin') {
-      router.push('/admin/dashboard')
-    } else {
-      router.push('/dashboard')
+    // if (user?.role === 'admin') {
+    //   router.push('/admin/dashboard')
+    // } else {
+    //   router.push('/dashboard')
+    // }
+    switch (user?.role) {
+      case "admin":
+        router.push('/admin/dashboard')
+        break;
+      case "student":
+        router.push('/dashboard')
+        break;
+      case "teacher":
+        router.push('/teacher/dashboard')
+        break;
     }
   } catch (error) {
     console.error('Login failed:', error)

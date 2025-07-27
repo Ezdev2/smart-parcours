@@ -12,12 +12,16 @@
             <label class="block text-sm font-medium text-gray-700">Année Académique</label>
             <input type="text" v-model="formData.year" required 
               placeholder="Ex: 2024-2025"
+              :readonly="isTeacherRole && initialData"
+              :class="{'bg-gray-100': isTeacherRole && initialData}"
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700">Période (Semestre/Trimestre)</label>
             <input type="text" v-model="formData.semester" required 
               placeholder="Ex: Semestre 1, Trimestre 2"
+              :readonly="isTeacherRole && initialData"
+              :class="{'bg-gray-100': isTeacherRole && initialData}"
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
           </div>
         </div>
@@ -25,6 +29,8 @@
         <div>
           <label class="block text-sm font-medium text-gray-700">Classe du bulletin</label>
           <select v-model="formData.classId" required
+            :readonly="isTeacherRole && initialData"
+            :class="{'bg-gray-100': isTeacherRole && initialData}"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             <option value="">Sélectionner une classe</option>
             <option v-for="classe in availableClassesForBulletin" :key="classe.id" :value="classe.id">
@@ -33,11 +39,37 @@
           </select>
           <p class="mt-1 text-xs text-gray-500">La classe associée à ce bulletin spécifique.</p>
         </div>
+
         <div>
-          <label class="block text-sm font-medium text-gray-700">Proviseur</label>
-          <input type="text" :value="adminFullName" readonly
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 text-gray-700" />
-          <p class="mt-1 text-xs text-gray-500">Nom du proviseur</p>
+          <label class="block text-sm font-medium text-gray-700">Professeur Principal</label>
+          <template v-if="isTeacherRole">
+            <input type="text" :value="teacherFullName" readonly
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 text-gray-700" />
+            <p class="mt-1 text-xs text-gray-500">Nom de l'enseignant connecté.</p>
+          </template>
+          <template v-else-if="authStore.user?.role === 'admin'">
+            <div class="flex items-center gap-2 mt-1">
+                <select v-model="formData.professeurPrincipal"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Sélectionner un enseignant</option>
+                    <option v-for="teacher in availableTeachers" :key="teacher.id" :value="`${teacher.profile.firstName} ${teacher.profile.lastName}`">
+                        {{ teacher.profile.firstName }} {{ teacher.profile.lastName }}
+                        <span v-if="teacher.profile.classNames && teacher.profile.classNames.length > 0"> ({{ teacher.profile.classNames.join(', ') }})</span>
+                    </option>
+                    <option value="other">Autre (saisir manuellement)</option>
+                </select>
+                <input v-if="formData.professeurPrincipal === 'other'"
+                       type="text" v-model="formData.professeurPrincipal"
+                       placeholder="Saisir le nom de l'enseignant"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                </div>
+            <p class="mt-1 text-xs text-gray-500">Sélectionner l'enseignant principal du bulletin ou saisir.</p>
+          </template>
+          <template v-else>
+              <input type="text" :value="formData.professeurPrincipal || 'Non renseigné'" readonly
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 text-gray-700" />
+              <p class="mt-1 text-xs text-gray-500">Non modifiable pour ce rôle.</p>
+          </template>
         </div>
 
         <div>
@@ -52,6 +84,8 @@
                 <label class="block text-sm font-medium text-gray-700">Rang dans la classe (Optionnel)</label>
                 <input type="number" min="1" v-model.number="formData.classRank" 
                     placeholder="Ex: 3"
+                    :readonly="isTeacherRole && initialData"
+                    :class="{'bg-gray-100': isTeacherRole && initialData}"
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
             </div>
             <div>
@@ -67,6 +101,8 @@
           <label class="block text-sm font-medium text-gray-700">Commentaire Général (Optionnel)</label>
           <textarea v-model="formData.generalComment" rows="3" 
             placeholder="Ex: Bon trimestre, élève sérieux et motivé."
+            :readonly="isTeacherRole && initialData"
+            :class="{'bg-gray-100': isTeacherRole && initialData}"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
         </div>
 
@@ -74,6 +110,8 @@
             <label class="block text-sm font-medium text-gray-700">Commentaire Absences/Vie Scolaire (Optionnel)</label>
             <textarea v-model="formData.absencesComment" rows="2"
                 placeholder="Ex: 2 retards, 1 absence justifiée."
+                :readonly="isTeacherRole && initialData"
+                :class="{'bg-gray-100': isTeacherRole && initialData}"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
             <p class="mt-1 text-xs text-gray-500">Ce champ est à compléter manuellement pour les retards/absences non gérés par l'application.</p>
         </div>
@@ -81,9 +119,9 @@
         <div class="border-t pt-4 mt-4">
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-lg font-bold text-gray-800">Notes par Matière</h3>
-            <Button type="button" @click="addSubject" size="sm" variant="secondary">
+            <Button class="mt-6" type="button" @click="addSubject" size="sm" variant="secondary">
               <PlusIcon class="h-4 w-4 mr-1" /> Ajouter une matière
-            </Button>
+          </Button>
           </div>
 
           <div v-if="formData.subjects.length === 0" class="text-center text-gray-500 py-4">
@@ -108,6 +146,8 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Nom de la matière</label>
                   <select v-model="subject.name" 
+                          :disabled="isTeacherRole && initialData"
+                          :class="{'bg-gray-100': isTeacherRole && initialData}"
                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                     <option value="">Sélectionner une matière</option>
                     <option v-for="s in availableSubjects" :key="s.id" :value="s.name">
@@ -117,9 +157,15 @@
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Enseignant</label>
-                  <input type="text" v-model="subject.teacher" 
-                    placeholder="Ex: M. Dupont"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                  <template v-if="isTeacherRole">
+                    <input type="text" :value="teacherFullName" readonly
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100" />
+                  </template>
+                  <template v-else-if="authStore.user?.role === 'admin'">
+                    <input type="text" v-model="subject.teacher"
+                           placeholder="Ex: M. Dupont"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                  </template>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Note (/20)</label>
@@ -130,6 +176,8 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Coefficient</label>
                   <select v-model.number="subject.coefficient" 
+                          :disabled="isTeacherRole && initialData"
+                          :class="{'bg-gray-100': isTeacherRole && initialData}"
                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                     <option :value="null">Auto (si sélectionné)</option>
                     <option v-for="i in 10" :key="i" :value="i">{{ i }}</option>
@@ -141,12 +189,16 @@
                   <label class="block text-sm font-medium text-gray-700">Moyenne de la Classe (Optionnel)</label>
                   <input type="number" step="0.1" min="0" max="20" v-model.number="subject.classAverage"
                     placeholder="Ex: 14.5"
+                    :readonly="isTeacherRole && initialData"
+                    :class="{'bg-gray-100': isTeacherRole && initialData}"
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Note la plus haute (Optionnel)</label>
                   <input type="number" step="0.1" min="0" max="20" v-model.number="subject.highestGrade"
                     placeholder="Ex: 19.0"
+                    :readonly="isTeacherRole && initialData"
+                    :class="{'bg-gray-100': isTeacherRole && initialData}"
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
                 </div>
               </div>
@@ -158,9 +210,6 @@
               </div>
             </div>
           </div>
-          <Button class="mt-6" type="button" @click="addSubject" size="sm" variant="secondary">
-              <PlusIcon class="h-4 w-4 mr-1" /> Ajouter une matière
-          </Button>
         </div>
 
         <div class="flex justify-end space-x-3 mt-6">
@@ -176,11 +225,11 @@
 
 <script setup>
 import { reactive, watch, ref, onMounted, computed } from 'vue';
-import { FirebaseService } from '../../services/firebaseService';
-import Card from '../../components/UI/Card.vue';
-import Button from '../../components/UI/Button.vue';
-import { XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline';
-import { useAuthStore } from '../../stores/auth';
+import { FirebaseService } from '../../services/firebaseService'; // Adjust path
+import Card from '../../components/UI/Card.vue'; // Adjust path
+import Button from '../../components/UI/Button.vue'; // Adjust path
+import { XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline'; // Adjust path
+import { useAuthStore } from '../../stores/auth'; // Adjust path
 
 const props = defineProps({
   initialData: {
@@ -190,6 +239,10 @@ const props = defineProps({
   studentId: {
     type: String,
     required: true
+  },
+  studentCurrentClassId: { // This is the ID of the student's *current* class, used for default selection
+    type: String,
+    default: null
   }
 });
 
@@ -199,13 +252,13 @@ const authStore = useAuthStore();
 const formData = reactive({
   year: new Date().getFullYear().toString(),
   semester: '',
-  generalAverage: null, // Will be calculated
+  generalAverage: null,
   classRank: null,
-  totalStudents: null, // Will be calculated
+  totalStudents: null,
   generalComment: '',
-  professeurPrincipal: null, // This will be managed by admin's full name
+  professeurPrincipal: null, // This will be managed by admin's full name or selected teacher
   absencesComment: null,
-  classId: null, // <<< NEW: Add classId to formData >>>
+  classId: null, // Class ID for this specific bulletin
   subjects: []
 });
 
@@ -213,13 +266,28 @@ const availableSubjects = ref([]);
 const availableClassesForBulletin = ref([]);
 const studentClassAndSchool = ref(null);
 
+// Teacher specific refs
+const availableTeachers = ref([]); // List of teachers for admin to select from
+
+const isTeacherRole = computed(() => authStore.user?.role === 'teacher'); // Computed for role check
+
+// Computed property for teacher's full name (if current user is teacher)
+const teacherFullName = computed(() => {
+  if (isTeacherRole.value && authStore.user?.profile?.firstName && authStore.user?.profile?.lastName) {
+    return `${authStore.user.profile.firstName} ${authStore.user.profile.lastName}`;
+  }
+  return '';
+});
+
+// Computed property for admin's full name (if current user is admin, for Professeur Principal default)
 const adminFullName = computed(() => {
   if (authStore.user?.profile?.firstName && authStore.user?.profile?.lastName) {
     return `${authStore.user.profile.firstName} ${authStore.user.profile.lastName}`;
   }
-  return '...';
+  return 'Non renseigné';
 });
 
+// Computed property to calculate general average
 const calculatedGeneralAverage = computed(() => {
   let totalWeightedGrades = 0;
   let totalCoefficients = 0;
@@ -240,14 +308,16 @@ const calculatedGeneralAverage = computed(() => {
   return '';
 });
 
+
 // Load all classes from admin settings for the bulletin class dropdown
 const loadAvailableClassesForBulletin = async () => {
     if (!authStore.user || !authStore.user.id) {
-        console.warn("Admin ID not available to load classes for bulletin.");
+        console.warn("User ID not available to load classes for bulletin.");
         return;
     }
+    const adminId = authStore.user.role === 'admin' ? authStore.user.id : authStore.user.profile.school; // Get adminId from user or teacher profile
     try {
-        const adminSettings = await FirebaseService.getOrCreateSettingsForAdmin(authStore.user.id);
+        const adminSettings = await FirebaseService.getOrCreateSettingsForAdmin(adminId);
         if (adminSettings && adminSettings.classes && adminSettings.classes.length > 0) {
             const classPromises = adminSettings.classes.map(id => FirebaseService.getClassById(id));
             const fetchedClasses = await Promise.all(classPromises);
@@ -281,11 +351,12 @@ const loadStudentClassAndSchool = async () => {
 
 const loadAvailableSubjects = async () => {
   if (!authStore.user || !authStore.user.id) {
-    console.warn("Admin ID not available to load subjects from settings.");
+    console.warn("User ID not available to load subjects from settings.");
     return;
   }
+  const adminId = authStore.user.role === 'admin' ? authStore.user.id : authStore.user.profile.school;
   try {
-    const adminSettings = await FirebaseService.getOrCreateSettingsForAdmin(authStore.user.id);
+    const adminSettings = await FirebaseService.getOrCreateSettingsForAdmin(adminId);
     if (adminSettings && adminSettings.subjects && adminSettings.subjects.length > 0) {
       const subjectPromises = adminSettings.subjects.map(id => FirebaseService.getSubjectById(id));
       const fetchedSubjects = await Promise.all(subjectPromises);
@@ -299,23 +370,38 @@ const loadAvailableSubjects = async () => {
   }
 };
 
-watch(() => props.initialData, async (newVal) => {
-  await loadAvailableSubjects();
-  await loadAvailableClassesForBulletin(); // <<< NEW: Load classes for bulletin form >>>
-  await loadStudentClassAndSchool();
+// Load teachers for admin to select from
+const loadAvailableTeachers = async () => {
+  // Only load if current user is admin, as only admin will select teachers
+  if (authStore.user?.role === 'admin' && authStore.user?.id) {
+    try {
+      const teachers = await FirebaseService.getAllTeachersForAdmin(authStore.user.id);
+      availableTeachers.value = teachers;
+    } catch (error) {
+      console.error("Error loading teachers for selection:", error);
+      availableTeachers.value = [];
+    }
+  }
+};
 
-  formData.professeurPrincipal = newVal?.professeurPrincipal || adminFullName.value;
+watch(() => props.initialData, async (newVal) => {
+  // Load necessary data regardless of role or initialData state
+  await loadAvailableSubjects();
+  await loadAvailableClassesForBulletin();
+  await loadStudentClassAndSchool();
+  await loadAvailableTeachers(); // Load teachers for selection (if admin)
 
   if (newVal) {
+    // Editing existing bulletin: populate form with bulletin data
     formData.year = newVal.year || new Date().getFullYear().toString();
     formData.semester = newVal.semester || '';
     formData.generalAverage = newVal.generalAverage || null;
     formData.classRank = newVal.classRank || null;
     formData.totalStudents = newVal.totalStudents || null;
     formData.generalComment = newVal.generalComment || '';
-    formData.professeurPrincipal = newVal.professeurPrincipal || adminFullName.value;
+    formData.professeurPrincipal = newVal.professeurPrincipal || null; // Use existing principal from bulletin
     formData.absencesComment = newVal.absencesComment || null;
-    formData.classId = newVal.classId || null; // <<< NEW: Populate classId >>>
+    formData.classId = newVal.classId || null; // Populate with bulletin's classId
     formData.subjects = newVal.subjects ? newVal.subjects.map(sub => ({
       ...sub,
       coefficient: typeof sub.coefficient === 'string' ? parseFloat(sub.coefficient) : sub.coefficient,
@@ -323,19 +409,30 @@ watch(() => props.initialData, async (newVal) => {
       highestGrade: sub.highestGrade || null
     })) : [];
   } else {
+    // Creating new bulletin: default values
     formData.year = new Date().getFullYear().toString();
     formData.semester = '';
     formData.generalAverage = null;
     formData.classRank = null;
-    formData.totalStudents = null;
+    formData.totalStudents = null; // Will be calculated on submit
     formData.generalComment = '';
-    formData.professeurPrincipal = adminFullName.value; // For new bulletins, default to current admin
     formData.absencesComment = null;
-    // For new bulletins, try to pre-select student's current class if available
-    formData.classId = studentClassAndSchool.value ? studentClassAndSchool.value.classId : null; // <<< NEW: Pre-select current class >>>
     formData.subjects = [];
+
+    // Auto-select principal based on role
+    if (isTeacherRole.value) {
+      formData.professeurPrincipal = teacherFullName.value;
+    } else if (authStore.user?.role === 'admin') {
+      formData.professeurPrincipal = adminFullName.value;
+    } else {
+      formData.professeurPrincipal = null;
+    }
+
+    // Auto-select student's current class for new bulletins
+    formData.classId = props.studentCurrentClassId || null;
   }
 }, { immediate: true });
+
 
 watch(formData.subjects, (newSubjects) => {
   newSubjects.forEach(subject => {
@@ -364,7 +461,7 @@ const addSubject = () => {
     grade: null,
     coefficient: null,
     comment: '',
-    teacher: '',
+    teacher: isTeacherRole.value ? teacherFullName.value : '', // Auto-fill for teacher
     classAverage: null,
     highestGrade: null
   });
@@ -401,7 +498,7 @@ const handleSubmit = async () => {
       classRank: formData.classRank,
       totalStudents: formData.totalStudents,
       generalComment: formData.generalComment,
-      professeurPrincipalName: formData.professeurPrincipal,
+      professeurPrincipalName: formData.professeurPrincipal, // Pass the name
       absencesComment: formData.absencesComment,
       subjects: formData.subjects.filter(s => s.name && s.grade !== null && s.coefficient !== null).map(s => ({
         ...s,

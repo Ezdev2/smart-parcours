@@ -11,7 +11,7 @@ Le cœur de l'application repose sur un système d'authentification robuste via 
 
 * **Connexion sécurisée :** Les utilisateurs peuvent se connecter à l'application en utilisant leur adresse e-mail et leur mot de passe. Le système de connexion est géré par Firebase Authentication, garantissant la sécurité des identifiants.
 * **Création de compte administrateur (sur rendez-vous) :** Pour le moment, la création de comptes administrateur est une opération contrôlée. Seul le propriétaire de l'application (ou une personne désignée ayant un accès direct à la console Firebase ou à des outils d'administration spécifiques) peut créer de nouveaux comptes administrateur. Cela assure un contrôle strict sur les accès privilégiés à l'application.
-* **Gestion des rôles :** L'application différencie les utilisateurs par des rôles (`admin`, `student`). Ces rôles déterminent les fonctionnalités accessibles et les actions autorisées pour chaque utilisateur.
+* **Gestion des rôles :** L'application différencie les utilisateurs par des rôles (`admin`, `student`, `teacher`). Ces rôles déterminent les fonctionnalités accessibles et les actions autorisées pour chaque utilisateur.
 * **Alertes et Confirmations :** Des modales d'alerte et de confirmation stylisées (`ConfirmDialog`) sont utilisées pour une meilleure expérience utilisateur lors des opérations sensibles ou des messages d'information.
 
 ---
@@ -25,6 +25,7 @@ Les administrateurs disposent d'un module complet pour configurer les informatio
 * **Personnalisation de l'interface :** Il est possible de choisir une couleur thématique principale et de télécharger l'URL d'un logo pour personnaliser l'apparence de l'application.
 * **Configuration des classes :** L'administrateur peut ajouter, supprimer et gérer la liste des classes de son établissement. Il peut sélectionner des classes existantes ou en créer de nouvelles directement depuis l'interface.
 * **Configuration des matières :** Similairement aux classes, l'administrateur peut définir les différentes matières enseignées, avec un nom, un code et un coefficient.
+* **Configuration des enseignants (Nouveau) :** Les administrateurs peuvent désormais visualiser, modifier, gérer et ajouter une liste d'enseignants associés à leur établissement. Cette gestion s'intègre aux paramètres généraux de l'établissement.
 * **Sauvegarde des modifications :** Toutes les modifications apportées aux paramètres sont persistantes et sauvegardées dans Firestore, garantissant que la configuration de l'établissement est toujours à jour.
 
 ---
@@ -57,14 +58,26 @@ Un module dédié permet aux administrateurs de gérer efficacement la base de d
     * **Ajout de bulletins :** L'administrateur peut ajouter de nouveaux bulletins, avec sélection de la classe spécifique du bulletin (l'actuelle étant pré-sélectionnée) et saisie détaillée des notes par matière (nom, enseignant, note, coefficient, moyenne de classe, meilleure note, appréciation), ainsi que des commentaires généraux et sur les absences.
     * **Moyenne Générale Automatique :** La moyenne générale du bulletin est calculée dynamiquement en temps réel à partir des notes et coefficients saisis.
     * **Nombre total d'élèves :** Le nombre total d'élèves dans la classe du bulletin est automatiquement calculé.
-    * **Professeur Principal :** Le nom de l'administrateur connecté est automatiquement renseigné comme professeur principal.
+    * **Professeur Principal :** Pour les administrateurs, le champ "Professeur Principal" permet désormais de sélectionner un enseignant dans la liste configurée dans les paramètres de l'établissement, avec une option pour ajouter un nouvel enseignant si nécessaire.
     * **Modification et Suppression :** Les administrateurs peuvent modifier et supprimer des bulletins existants.
     * **Visualisation du bulletin :** Le bulletin est affiché dans un **format de template imprimable** (`BulletinViewer`), reproduisant le design d'un bulletin scolaire, avec le nom de l'école dynamique et l'adresse.
     * **Téléchargement PDF :** Le bulletin peut être téléchargé en format PDF directement depuis le `BulletinViewer`.
 
 ---
 
-### 4. Profil étudiant (pour les étudiants)
+### 4. Gestion des élèves (pour les enseignants) (Nouveau)
+
+Les enseignants disposent d'un module dédié pour interagir avec les dossiers de leurs élèves.
+
+* **Vue de la liste des élèves :** Les enseignants peuvent visualiser la liste des élèves affectés à leurs classes, avec des options de filtrage par classe et des modes d'affichage (vue carte/vue liste) similaires à ceux des administrateurs.
+* **Remplir les bulletins scolaires (Ajouter des notes de matière) :** Les enseignants ont la capacité de remplir les bulletins scolaires des élèves, spécifiquement dans la section d'ajout de notes par matière.
+* **Remplissage automatique du nom de l'enseignant :** Lorsqu'un enseignant ajoute une matière à un bulletin scolaire, son nom est automatiquement renseigné comme "enseignant" pour cette matière.
+* **Visualisation du bulletin rempli :** Les enseignants peuvent consulter un bulletin rempli, mais seule la section "ajouter des notes de matière" est interactive pour eux.
+* **Pas de recommandations :** La fonctionnalité de recommandation n'est pas accessible aux enseignants.
+
+---
+
+### 5. Profil étudiant (pour les étudiants)
 
 Les étudiants ont accès à leur propre profil pour consulter et mettre à jour leurs informations.
 
@@ -74,7 +87,7 @@ Les étudiants ont accès à leur propre profil pour consulter et mettre à jour
 
 ---
 
-### 5. Mes Bulletins (pour les étudiants)
+### 6. Mes Bulletins (pour les étudiants)
 
 Les étudiants peuvent consulter l'historique détaillé de leurs bulletins scolaires.
 
@@ -86,7 +99,7 @@ Les étudiants peuvent consulter l'historique détaillé de leurs bulletins scol
 
 ---
 
-### 6. Recommandations d'Orientation (pour les étudiants)
+### 7. Recommandations d'Orientation (pour les étudiants)
 
 C'est la fonctionnalité centrale de l'application "Smart Parcours", offrant des conseils personnalisés basés sur l'intelligence artificielle.
 
@@ -118,7 +131,7 @@ C'est la fonctionnalité centrale de l'application "Smart Parcours", offrant des
 
 ---
 
-### 7. Technologies sous-jacentes
+### 8. Technologies sous-jacentes
 
 L'application est construite avec des technologies modernes et robustes :
 

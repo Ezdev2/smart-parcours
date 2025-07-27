@@ -44,7 +44,7 @@ export class FirebaseService {
           ...userData.profile,
           registrationCode:
             userData.profile.registrationCode ||
-            (await this.generateUniqueRegistrationCode()),
+            (await this.generateUniqueRegistrationCode(userData.role === "teacher" ? "TEACH" : "STU")),
         },
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -65,90 +65,85 @@ export class FirebaseService {
   }
 
   /**
-   * Créer un étudiant avec toutes les données nécessaires
-   * @param {Object} studentData - Données de l'étudiant (firstName, lastName, email, class, level, registrationCode, schoolId, etc.)
-   * @param {string} adminId - L'ID de l'admin qui crée l'étudiant
-   */
-  static async createStudent(studentData, adminId) {
-    const temporaryPassword = this.generateTemporaryPassword(); // For initial login
-
-    const userData = {
-      email: studentData.email,
-      role: "student",
-      profile: {
-        firstName: studentData.firstName,
-        lastName: studentData.lastName,
-        dateOfBirth: studentData.dateOfBirth || null,
-        class: studentData.class, // Storing class ID
-        level: await this.extractLevelFromClassId(studentData.class),
-        filieres: studentData.filieres || [],
-        interests: studentData.interests || [],
-        averageGrade: studentData.averageGrade || null,
-        registrationCode:
-          studentData.registrationCode ||
-          (await this.generateUniqueRegistrationCode()),
-        school: adminId,
-      },
-      bulletins: [], // Initialize an empty array for bulletin IDs
-    };
-
-    try {
-      // 1. Create user in Firebase Auth and get their UID
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        userData.email,
-        temporaryPassword
-      );
-      const userId = userCredential.user.uid;
-
-      // 2. Set the user's profile in Firestore using their UID as document ID
-      await setDoc(doc(firestore, "users", userId), {
-        ...userData,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        isActive: true, // Mark as active by default
-        lastLoginAt: null,
-      });
-
-      // 3. Create a default empty bulletin for the student
-      const defaultBulletinData = {
-        studentId: userId,
-        year: new Date().getFullYear().toString(), // Current year
-        semester: "Annuel", // Or "1er Trimestre", "Semestre 1", etc.
-        generalAverage: null,
-        notes: [], // Empty notes array
-        comments: "Bulletin initial. À compléter par l'administration.",
-        uploadedAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+     * Créer un étudiant avec toutes les données nécessaires
+     * @param {Object} studentData - Données de l'étudiant (firstName, lastName, email, class, level, registrationCode, schoolId, etc.)
+     * @param {string} adminId - L'ID de l'admin qui crée l'étudiant
+     */
+    static async createStudent(studentData, adminId) {
+      const temporaryPassword = this.generateTemporaryPassword(); // For initial login
+  
+      const userData = {
+        email: studentData.email,
+        role: "student",
+        profile: {
+          firstName: studentData.firstName,
+          lastName: studentData.lastName,
+          dateOfBirth: studentData.dateOfBirth || null,
+          class: studentData.class, // Storing class ID
+          level: await this.extractLevelFromClassId(studentData.class),
+          filieres: studentData.filieres || [],
+          interests: studentData.interests || [],
+          averageGrade: studentData.averageGrade || null,
+          registrationCode:
+            studentData.registrationCode ||
+            (await this.generateUniqueRegistrationCode("STU")),
+          school: adminId,
+        },
+        bulletins: [], // Initialize an empty array for bulletin IDs
       };
-      const bulletinRef = await addDoc(
-        collection(firestore, "bulletins"),
-        defaultBulletinData
-      );
-
-      // 4. Update the student's user document with the new bulletin ID
-      await updateDoc(doc(firestore, "users", userId), {
-        bulletins: [bulletinRef.id],
-        updatedAt: serverTimestamp(),
-      });
-
-      // 5. Send password reset email
-      await sendPasswordResetEmail(auth, userData.email);
-
-      console.log(
-        `Student ${userId} created with default bulletin ${bulletinRef.id}`
-      );
-      return {
-        userId,
-        success: true,
-        temporaryPassword,
-        bulletinId: bulletinRef.id,
-      };
-    } catch (error) {
-      console.error("Error creating student:", error);
-      throw error;
+  
+      try {
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          userData.email,
+          temporaryPassword
+        );
+        const userId = userCredential.user.uid;
+  
+        await setDoc(doc(firestore, "users", userId), {
+          ...userData,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          isActive: true,
+          lastLoginAt: null,
+        });
+  
+        const defaultBulletinData = {
+          studentId: userId,
+          year: new Date().getFullYear().toString(),
+          semester: "Annuel",
+          generalAverage: null,
+          notes: [],
+          comments: "Bulletin initial. À compléter par l'administration.",
+          uploadedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+        const bulletinRef = await addDoc(
+          collection(firestore, "bulletins"),
+          defaultBulletinData
+        );
+  
+        await updateDoc(doc(firestore, "users", userId), {
+          bulletins: [bulletinRef.id],
+          updatedAt: serverTimestamp(),
+        });
+  
+        await sendPasswordResetEmail(auth, userData.email);
+  
+        console.log(
+          `Student ${userId} created with default bulletin ${bulletinRef.id}`
+        );
+        return {
+          userId,
+          success: true,
+          temporaryPassword,
+          bulletinId: bulletinRef.id,
+        };
+      } catch (error) {
+        console.error("Error creating student:", error);
+        throw error;
+      }
     }
-  }
 
   /**
    * Mettre à jour les détails d'un étudiant (seulement le profil Firestore)
@@ -218,7 +213,7 @@ export class FirebaseService {
       const q = query(
         collection(firestore, "users"),
         where("role", "==", "student"),
-        where("profile.school", "==", adminId), // Filter by admin's ID
+        where("profile.school", "==", adminId),
         where("isActive", "==", true),
         orderBy("profile.lastName")
       );
@@ -353,7 +348,8 @@ export class FirebaseService {
   }
 
   /**
-   * Mettre à jour le profil utilisateur
+   * Mettre à jour les détails d'un utilisateur (seulement le profil Firestore)
+   * Peut être utilisé pour student ou teacher
    */
   static async updateUserProfile(userId, profileData) {
     try {
@@ -460,7 +456,146 @@ export class FirebaseService {
   }
 
   /**
-   * Désactiver un utilisateur
+   * Créer un profil professeur
+   */
+  static async createTeacher(teacherData, adminId) {
+    const temporaryPassword = this.generateTemporaryPassword();
+
+    const userData = {
+      email: teacherData.email,
+      role: "teacher",
+      profile: {
+        firstName: teacherData.firstName,
+        lastName: teacherData.lastName,
+        registrationCode: teacherData.registrationCode ||
+          (await this.generateUniqueRegistrationCode("TEACH")),
+        school: adminId, // Link teacher to the admin's school
+        classes: teacherData.classes || [] // Classes assigned to the teacher
+      }
+    };
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        userData.email,
+        temporaryPassword
+      );
+      const userId = userCredential.user.uid;
+
+      await setDoc(doc(firestore, "users", userId), {
+        ...userData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        isActive: true,
+        lastLoginAt: null,
+      });
+
+      await sendPasswordResetEmail(auth, userData.email);
+
+      return { userId, success: true, temporaryPassword };
+    } catch (error) {
+      console.error("Error creating teacher:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Récuperer la liste des proffeseurs d'une école (admin)
+   */
+  static async getAllTeachersForAdmin(adminId) {
+    try {
+      const q = query(
+        collection(firestore, "users"),
+        where("role", "==", "teacher"),
+        where("profile.school", "==", adminId),
+        where("isActive", "==", true),
+        orderBy("profile.lastName")
+      );
+      const querySnapshot = await getDocs(q);
+      const teachers = [];
+
+      for (const doc of querySnapshot.docs) {
+        const teacherData = doc.data();
+        const teacher = {
+          id: doc.id,
+          ...teacherData,
+          createdAt: teacherData.createdAt?.toDate(),
+          updatedAt: teacherData.updatedAt?.toDate(),
+          lastLoginAt: teacherData.lastLoginAt?.toDate(),
+        };
+
+        // Enrichir avec les noms des classes
+        if (teacher.profile.classes && teacher.profile.classes.length > 0) {
+          const classPromises = teacher.profile.classes.map(id => this.getClassById(id));
+          const fetchedClasses = await Promise.all(classPromises);
+          teacher.profile.classNames = fetchedClasses
+            .filter(cls => cls !== null)
+            .map(cls => cls.name);
+        } else {
+          teacher.profile.classNames = [];
+        }
+
+        teachers.push(teacher);
+      }
+      return teachers;
+    } catch (error) {
+      console.error("Error getting teachers for admin:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Récuperer la liste des étudiants par proffeseur
+   */
+  static async getStudentsForTeacher(teacherId) {
+    try {
+      const teacher = await this.getUserById(teacherId);
+      if (!teacher || !teacher.profile.classes || teacher.profile.classes.length === 0) {
+        return []; // If teacher not found or no classes assigned, return empty array
+      }
+
+      // Firestore 'in' query allows up to 10 items. If a teacher has more classes,
+      // you'd need to split this into multiple queries. For simplicity, assuming <=10 classes for now.
+      const q = query(
+        collection(firestore, "users"),
+        where("role", "==", "student"),
+        where("profile.school", "==", teacher.profile.school),
+        where("profile.class", "in", teacher.profile.classes), // Filter by assigned classes
+        where("isActive", "==", true),
+        orderBy("profile.lastName")
+      );
+
+      const querySnapshot = await getDocs(q);
+      const students = [];
+
+      for (const doc of querySnapshot.docs) {
+        const studentData = doc.data();
+        const student = {
+          id: doc.id,
+          ...studentData,
+          createdAt: studentData.createdAt?.toDate(),
+          updatedAt: studentData.updatedAt?.toDate(),
+          lastLoginAt: studentData.lastLoginAt?.toDate(),
+        };
+
+        if (student.profile.class) {
+          const classInfo = await this.getClassById(student.profile.class);
+          student.profile.classDisplayName = classInfo ? classInfo.name : student.profile.class;
+        }
+
+        students.push(student);
+      }
+      return students;
+    } catch (error) {
+      console.error("Error getting students for teacher:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Supprimer un utilisateur (désactiver le compte et le profil)
+   * Note: Firebase Auth n'est pas directement supprimé pour éviter des problèmes
+   * mais le compte sera "désactivé" dans Firestore.
    */
   static async deactivateUser(userId) {
     try {
@@ -496,7 +631,7 @@ export class FirebaseService {
         uploadedAt: doc.data().uploadedAt?.toDate(),
         updatedAt: doc.data().updatedAt?.toDate(),
         subjects: doc.data().subjects || [],
-        classId: doc.data().classId || null, // <<< NEW: Return classId >>>
+        classId: doc.data().classId || null,
       }));
     } catch (error) {
       console.error("Error getting bulletins:", error);
@@ -518,7 +653,7 @@ export class FirebaseService {
           uploadedAt: data.uploadedAt?.toDate(),
           updatedAt: data.updatedAt?.toDate(),
           subjects: data.subjects || [],
-          classId: data.classId || null, // <<< NEW: Return classId >>>
+          classId: data.classId || null,
         };
       }
       return null;
@@ -625,7 +760,6 @@ export class FirebaseService {
    */
   static async deleteBulletin(bulletinId) {
     try {
-      // Fetch the bulletin to get studentId before deleting
       const bulletinToDelete = await this.getBulletinById(bulletinId);
       if (!bulletinToDelete) {
         throw new Error("Bulletin not found for deletion.");
@@ -634,7 +768,6 @@ export class FirebaseService {
 
       await deleteDoc(doc(firestore, "bulletins", bulletinId));
 
-      // After deleting a bulletin, recalculate and update overall student average
       await this.calculateAndUpdateStudentOverallAverage(studentId);
 
       return true;
@@ -644,25 +777,16 @@ export class FirebaseService {
     }
   }
 
-    /**
+  /**
    * Obtenir le nombre d'étudiants dans une classe spécifique pour une école donnée.
    * Cette fonction est essentielle pour le champ 'totalStudents' du bulletin.
-   * IMPORTANT: Ce calcul doit maintenant utiliser le classId stocké dans le bulletin,
-   * ou être adapté pour le nouveau contexte. Pour le contexte du bulletin,
-   * il devrait compter les étudiants ayant cette classe *à l'année académique du bulletin*.
-   * Pour l'instant, on se base sur la classe actuelle du profil étudiant, ce qui peut être inexact.
-   * Si vous voulez une précision historique, il faudrait stocker l'année académique dans le profil étudiant
-   * ou filtrer les étudiants qui étaient dans cette classe à cette année.
-   * Pour l'instant, nous utiliserons la classe actuelle du profil comme proxy.
-   * Si `totalStudents` est stocké directement dans le bulletin, cette fonction devient moins critique pour le bulletin lui-même
-   * et est surtout utile pour le formulaire.
    */
   static async getStudentCountInClass(classId, schoolId) {
     try {
       const q = query(
         collection(firestore, "users"),
         where("role", "==", "student"),
-        where("profile.class", "==", classId), // Assuming this still refers to the class ID for the count
+        where("profile.class", "==", classId),
         where("profile.school", "==", schoolId),
         where("isActive", "==", true)
       );

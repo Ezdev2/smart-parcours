@@ -17,6 +17,8 @@ import AdminSettings from '../pages/Admin/Settings.vue'
 
 // Layout
 import AppLayout from '../components/Layout/AppLayout.vue'
+import TeacherDashboard from '../pages/Teacher/TeacherDashboard.vue'
+import TeacherStudents from '../pages/Teacher/TeacherStudents.vue'
 
 const routes = [
   {
@@ -77,6 +79,19 @@ const routes = [
         name: 'AdminSettings',
         component: AdminSettings,
         meta: { requiresAuth: true, role: 'admin' }
+      },
+      // Teacher routes
+      {
+        path: '/teacher/dashboard',
+        name: 'TeacherDashboard',
+        component: TeacherDashboard,
+        meta: { requiresAuth: true, role: 'teacher' }
+      },
+      {
+        path: '/teacher/students',
+        name: 'TeacherStudents',
+        component: TeacherStudents,
+        meta: { requiresAuth: true, role: 'teacher' }
       }
     ]
   },

@@ -34,7 +34,11 @@
             {{ user?.profile.firstName }} {{ user?.profile.lastName }}
           </div>
           <div class="text-gray-500 text-xs">
-            {{ user?.role === 'admin' ? 'Administrateur' : 'Étudiant' }}
+            {{ 
+              user?.role === 'admin' ? 'Administrateur' : 
+              user?.role === 'teacher' ? 'Enseignant' : 
+              'Étudiant' 
+            }}
           </div>
         </div>
       </div>
@@ -87,8 +91,15 @@ const adminNavItems = [
   { name: 'Paramètres', href: '/admin/settings', icon: CogIcon },
 ]
 
+const teacherNavItems = [
+  { name: 'Dashboard', href: '/teacher/dashboard', icon: HomeIcon },
+  { name: 'Mes élèves', href: '/teacher/students', icon: UsersIcon },
+]
+
 const navItems = computed(() => {
-  return user.value?.role === 'admin' ? adminNavItems : studentNavItems
+  if (user.value?.role === 'admin') return adminNavItems
+  if (user.value?.role === 'teacher') return teacherNavItems
+  return studentNavItems
 })
 
 const handleSignOut = async () => {
