@@ -7,9 +7,7 @@
       </Button>
     </div>
 
-    <div v-if="loading" class="flex justify-center py-4">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-    </div>
+    <LoadingSpinner v-if="loading" text="Chargement de votre tableau de bord..." color="indigo" class="my-8" />
 
     <div v-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
       {{ error }}
@@ -238,28 +236,26 @@ import { useAuthStore } from '../../stores/auth'
 import { FirebaseService } from '../../services/firebaseService'
 import Card from '../../components/UI/Card.vue'
 import Button from '../../components/UI/Button.vue'
+import LoadingSpinner from '../../components/UI/LoadingSpinner.vue'
 
-// Import des données statiques
 import { availableFilieres } from '../../assets/data/dataFiliere.js'
 import { availableInterests } from '../../assets/data/dataInterest.js'
 
 const authStore = useAuthStore()
 const user = computed(() => authStore.user)
 
-// States
-const schoolName = ref(''); // Add schoolName ref
+const schoolName = ref('');
 const editing = ref(false)
 const loading = ref(false)
 const submitting = ref(false)
 const error = ref(null)
 const availableClasses = ref([])
 
-// Form data
 const formData = reactive({
   firstName: '',
   lastName: '',
   dateOfBirth: '',
-  class: '', // Stores class ID
+  class: '',
   averageGrade: null,
   filieres: [],
   interests: []
@@ -270,7 +266,6 @@ const formatDateForInput = (dateValue) => {
   
   let date
   if (dateValue.seconds) {
-    // Firestore timestamp
     date = new Date(dateValue.seconds * 1000)
   } else if (typeof dateValue === 'string') {
     date = new Date(dateValue)
@@ -280,7 +275,7 @@ const formatDateForInput = (dateValue) => {
     return ''
   }
   
-  // Format for HTML date input (YYYY-MM-DD)
+  // Format date input (YYYY-MM-DD)
   return date.toISOString().split('T')[0]
 }
 

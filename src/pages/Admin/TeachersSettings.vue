@@ -56,6 +56,7 @@
 
     <AddEditTeacherForm
       v-if="showTeacherFormModal"
+      :mode="teacherFormMode"
       :initial-data="editingTeacher"
       :all-classes="allAvailableClasses"
       @submit="handleTeacherFormSubmit"
@@ -78,15 +79,18 @@ import EmptyState from './../../components/UI/EmptyState.vue';
 import AddEditTeacherForm from './AddEditTeacherForm.vue';
 import { PlusIcon, PencilIcon, TrashIcon, UserGroupIcon } from '@heroicons/vue/24/outline';
 import ConfirmDialog from '../../components/UI/ConfirmDialog.vue';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
+const router = useRouter();
 const { showConfirm, showAlert } = useConfirm();
 
 const teachers = ref([]);
-const allAvailableClasses = ref([]); // To select classes for teachers
+const allAvailableClasses = ref([]);
 const loading = ref(true);
 const showTeacherFormModal = ref(false);
-const editingTeacher = ref(null); // Stores teacher data for editing
+const editingTeacher = ref(null);
+const teacherFormMode = ref('add'); // Corrigé: valeur par défaut cohérente
 
 const user = computed(() => authStore.user);
 
@@ -103,7 +107,6 @@ const loadTeachersAndClasses = async () => {
       FirebaseService.getAllClasses() // Get all classes to assign to teachers
     ]);
     teachers.value = fetchedTeachers;
-    
     allAvailableClasses.value = fetchedClasses;
   } catch (error) {
     console.error("Error loading teachers or classes:", error);
@@ -118,11 +121,23 @@ const loadTeachersAndClasses = async () => {
 // --- Form Management ---
 const openAddTeacherForm = () => {
   editingTeacher.value = null;
+  teacherFormMode.value = "add";
   showTeacherFormModal.value = true;
 };
 
 const openEditTeacherForm = (teacher) => {
-  editingTeacher.value = { ...teacher }; // Deep copy for editing
+  // Copie profonde pour éviter les mutations non désirées
+  editingTeacher.value = {
+    id: teacher.id,
+    email: teacher.email,
+    profile: {
+      firstName: teacher.profile?.firstName || '',
+      lastName: teacher.profile?.lastName || '',
+      classes: teacher.profile?.classes || [],
+      classNames: teacher.profile?.classNames || []
+    }
+  };
+  teacherFormMode.value = "edit"; // Corrigé: doit être une string
   showTeacherFormModal.value = true;
 };
 
@@ -135,17 +150,18 @@ const handleTeacherFormSubmit = async (teacherData, mode) => {
     if (mode === 'add') {
       const result = await FirebaseService.createTeacher(teacherData, user.value.id);
       showAlert('Succès', `Enseignant ${teacherData.firstName} ${teacherData.lastName} ajouté. Mot de passe temporaire: ${result.temporaryPassword}. Un email de réinitialisation a été envoyé.`, 'Ok');
+      router.push('/teacher/dashboard');
     } else if (mode === 'edit' && editingTeacher.value) {
       await FirebaseService.updateUserProfile(editingTeacher.value.id, {
-        firstName: teacherData.firstName,
-        lastName: teacherData.lastName,
-        classes: teacherData.classes, // Update assigned classes
-        // Email can't be changed this way, password is reset via email
+        email: teacherData.email,
+        profile: {
+          firstName: teacherData.firstName,
+          lastName: teacherData.lastName,
+          classes: teacherData.classes,
+        }
       });
       showAlert('Succès', `Enseignant ${teacherData.firstName} ${teacherData.lastName} mis à jour.`, 'Ok');
-      showTeacherFormModal.value = false
     }
-    // After creating/updating, also update the settings' teachers array
     await updateSettingsTeachersArray();
     await loadTeachersAndClasses();
     cancelTeacherForm();
@@ -158,6 +174,7 @@ const handleTeacherFormSubmit = async (teacherData, mode) => {
 const cancelTeacherForm = () => {
   showTeacherFormModal.value = false;
   editingTeacher.value = null;
+  teacherFormMode.value = "add"; // Reset à la valeur par défaut
 };
 
 const confirmDeleteTeacher = async (teacherId) => {
@@ -170,8 +187,7 @@ const confirmDeleteTeacher = async (teacherId) => {
 
   if (confirmed) {
     try {
-      await FirebaseService.deactivateUser(teacherId); // Use generic deactivateUser
-      // After deactivating, also update the settings' teachers array
+      await FirebaseService.deactivateUser(teacherId);
       await updateSettingsTeachersArray();
       showAlert('Succès', 'Compte enseignant désactivé avec succès.', 'Ok');
       await loadTeachersAndClasses();
@@ -182,25 +198,24 @@ const confirmDeleteTeacher = async (teacherId) => {
   }
 };
 
-// --- NEW: Function to update the settings' teachers array ---
+// --- Function to update the settings' teachers array ---
 const updateSettingsTeachersArray = async () => {
-    if (!user.value || !user.value.id) return;
-    try {
-        const currentSettings = await FirebaseService.getOrCreateSettingsForAdmin(user.value.id);
-        const activeTeachers = await FirebaseService.getAllTeachersForAdmin(user.value.id); // Get only active teachers
-        const activeTeacherIds = activeTeachers.map(t => t.id);
+  if (!user.value || !user.value.id) return;
+  try {
+    const currentSettings = await FirebaseService.getOrCreateSettingsForAdmin(user.value.id);
+    const activeTeachers = await FirebaseService.getAllTeachersForAdmin(user.value.id);
+    const activeTeacherIds = activeTeachers.map(t => t.id);
 
-        await FirebaseService.updateSettings(currentSettings.id, {
-            ...currentSettings, // Preserve existing settings
-            teachers: activeTeacherIds // Update only the teachers array
-        });
-        console.log("Settings' teachers array updated.");
-    } catch (error) {
-        console.error("Error updating settings teachers array:", error);
-        showAlert('Erreur', "Erreur lors de la mise à jour de la liste des enseignants dans les paramètres de l'établissement.", 'Compris');
-    }
+    await FirebaseService.updateSettings(currentSettings.id, {
+      ...currentSettings,
+      teachers: activeTeacherIds
+    });
+    console.log("Settings' teachers array updated.");
+  } catch (error) {
+    console.error("Error updating settings teachers array:", error);
+    showAlert('Erreur', "Erreur lors de la mise à jour de la liste des enseignants dans les paramètres de l'établissement.", 'Compris');
+  }
 };
-
 
 // --- Lifecycle ---
 onMounted(() => {

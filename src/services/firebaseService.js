@@ -70,7 +70,7 @@ export class FirebaseService {
      * @param {string} adminId - L'ID de l'admin qui crée l'étudiant
      */
     static async createStudent(studentData, adminId) {
-      const temporaryPassword = this.generateTemporaryPassword(); // For initial login
+      const temporaryPassword = this.generateTemporaryPassword();
   
       const userData = {
         email: studentData.email,
@@ -470,7 +470,7 @@ export class FirebaseService {
         registrationCode: teacherData.registrationCode ||
           (await this.generateUniqueRegistrationCode("TEACH")),
         school: adminId, // Link teacher to the admin's school
-        classes: teacherData.classes || [] // Classes assigned to the teacher
+        classes: teacherData.classes || []
       }
     };
 
@@ -850,7 +850,6 @@ export class FirebaseService {
       }
     } catch (error) {
       console.error(`Error calculating and updating overall average for student ${studentId}:`, error);
-      // Consider setting overallAverage to null or N/A on error, or rethrowing
       const studentRef = doc(firestore, "users", studentId);
       const studentDoc = await getDoc(studentRef);
       if (studentDoc.exists()) {
@@ -1459,37 +1458,65 @@ export class FirebaseService {
   // ============ ANALYTICS & STATISTICS ============
 
   /**
-   * Obtenir les statistiques des étudiants
+   * Obtenir les statistiques des étudiants (existing, but ensure profile.level is correctly populated)
    */
-  static async getStudentStatistics() {
+  static async getStudentStatistics(adminId) {
     try {
-      const students = await this.getAllStudents();
+      const students = await this.getAllStudentsForAdmin(adminId);
       const totalStudents = students.length;
 
       const classCounts = students.reduce((acc, student) => {
-        const className = student.profile.class;
+        const className = student.profile.classDisplayName || student.profile.class;
         acc[className] = (acc[className] || 0) + 1;
         return acc;
       }, {});
 
-      const averageGrades = students
-        .filter((s) => s.profile.averageGrade)
-        .map((s) => s.profile.averageGrade);
+      // For dashboard's overall average calculation (student's profile.averageGrade)
+      const overallAverages = students
+        .filter(s => s.profile.averageGrade !== undefined && s.profile.averageGrade !== null)
+        .map(s => parseFloat(s.profile.averageGrade));
+
+        
+        
 
       const globalAverage =
-        averageGrades.length > 0
-          ? averageGrades.reduce((sum, grade) => sum + grade, 0) /
-            averageGrades.length
+        overallAverages.length > 0
+          ? overallAverages.reduce((sum, grade) => sum + grade, 0) /
+            overallAverages.length
           : 0;
+
+      // Group students by level to calculate average per level
+      const averagesByLevel = students.reduce((acc, student) => {
+          const level = student.profile.level;
+          const overallAverage = student.profile.averageGrade !== undefined && student.profile.averageGrade !== null ? parseFloat(student.profile.averageGrade) : null;
+
+          if (level && overallAverage !== null) {
+              if (!acc[level]) {
+                  acc[level] = { sum: 0, count: 0 };
+              }
+              acc[level].sum += overallAverage;
+              acc[level].count += 1;
+          }
+          
+          return acc;
+      }, {});
+
+      const finalAveragesByLevel = {};
+      for (const level in averagesByLevel) {
+          if (averagesByLevel[level].count > 0) {
+              finalAveragesByLevel[level] = parseFloat((averagesByLevel[level].sum / averagesByLevel[level].count).toFixed(2));
+          }
+      }
 
       return {
         totalStudents,
         classCounts,
-        globalAverage: Math.round(globalAverage * 100) / 100,
-        studentsWithGrades: averageGrades.length,
+        globalAverage: globalAverage !== 0 ? parseFloat(globalAverage.toFixed(2)) : 0,
+        studentsWithOverallGrades: overallAverages.length,
+        averagesByLevel: finalAveragesByLevel
       };
     } catch (error) {
-      console.error("Error getting statistics:", error);
+      console.error("Error getting student statistics:", error);
       throw error;
     }
   }
@@ -1519,78 +1546,35 @@ export class FirebaseService {
   }
 
   /**
-   * Obtenir les statistiques des bulletins
-   */
-  static async getBulletinStatistics() {
-    try {
-      const bulletins = await this.getAllBulletins();
-      const totalBulletins = bulletins.length;
-
-      const yearCounts = bulletins.reduce((acc, bulletin) => {
-        acc[bulletin.year] = (acc[bulletin.year] || 0) + 1;
-        return acc;
-      }, {});
-
-      const semesterCounts = bulletins.reduce((acc, bulletin) => {
-        acc[bulletin.semester] = (acc[bulletin.semester] || 0) + 1;
-        return acc;
-      }, {});
-
-      const averageGrades = bulletins
-        .map((b) => b.generalAverage)
-        .filter(Boolean);
-      const globalAverage =
-        averageGrades.length > 0
-          ? averageGrades.reduce((sum, grade) => sum + grade, 0) /
-            averageGrades.length
-          : 0;
-
-      return {
-        totalBulletins,
-        yearCounts,
-        semesterCounts,
-        globalAverage: Math.round(globalAverage * 100) / 100,
-      };
-    } catch (error) {
-      console.error("Error getting bulletin statistics:", error);
-      throw error;
-    }
-  }
-
-  /**
    * Obtenir le tableau de bord admin
    */
-  static async getAdminDashboard() {
+  static async getAdminDashboard(adminId) { // Pass adminId to filter data
     try {
-      const [students, bulletins, recommendations, classes] = await Promise.all(
+      const [studentStats, bulletins, recommendations, classes, teachers] = await Promise.all(
         [
-          this.getAllStudents(),
+          this.getStudentStatistics(adminId),
           this.getAllBulletins(),
           this.getAllRecommendations(),
           this.getAllClasses(),
+          this.getAllTeachersForAdmin(adminId),
         ]
       );
 
-      // Statistiques récentes
-      const recentBulletins = bulletins.filter((b) => {
-        const uploadDate = new Date(b.uploadedAt);
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-        return uploadDate > oneWeekAgo;
-      }).length;
+      const studentsForAdmin = await this.getAllStudentsForAdmin(adminId);
+      const studentIdsForAdmin = new Set(studentsForAdmin.map(s => s.id));
 
-      const pendingRecommendations = recommendations.filter(
-        (r) => r.status === "pending"
-      ).length;
+      const bulletinsForAdmin = bulletins.filter(b => studentIdsForAdmin.has(b.studentId));
+      const recommendationsForAdmin = recommendations.filter(r => studentIdsForAdmin.has(r.studentId));
 
       return {
-        totalStudents: students.length,
-        totalBulletins: bulletins.length,
-        totalRecommendations: recommendations.length,
+        totalStudents: studentsForAdmin.length,
+        totalTeachers: teachers.length,
+        totalBulletins: bulletinsForAdmin.length,
+        totalRecommendations: recommendationsForAdmin.length,
         totalClasses: classes.length,
-        recentBulletins,
-        pendingRecommendations,
-        activeStudents: students.filter((s) => s.isActive).length,
+        classDistribution: studentStats.classCounts,
+        averagesByLevel: studentStats.averagesByLevel,
+        globalAverage: studentStats.globalAverage
       };
     } catch (error) {
       console.error("Error getting admin dashboard:", error);
@@ -1620,26 +1604,6 @@ export class FirebaseService {
       );
     } catch (error) {
       console.error("Error searching students:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Rechercher des bulletins
-   */
-  static async searchBulletins(searchTerm) {
-    try {
-      const bulletins = await this.getAllBulletins();
-      const lowercaseSearch = searchTerm.toLowerCase();
-
-      return bulletins.filter(
-        (bulletin) =>
-          bulletin.year.toLowerCase().includes(lowercaseSearch) ||
-          bulletin.semester.toLowerCase().includes(lowercaseSearch) ||
-          bulletin.studentId.toLowerCase().includes(lowercaseSearch)
-      );
-    } catch (error) {
-      console.error("Error searching bulletins:", error);
       throw error;
     }
   }

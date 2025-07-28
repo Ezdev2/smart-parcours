@@ -125,7 +125,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'; // Import ref
+import { ref } from 'vue';
 import Card from '@/components/UI/Card.vue';
 import {
   SparklesIcon,
@@ -144,7 +144,7 @@ import {
   CommandLineIcon, // Informatics
   CalculatorIcon, // Logical (alternative)
   LightBulbIcon // Creative (alternative)
-} from '@heroicons/vue/24/outline'; // Updated import for all necessary icons
+} from '@heroicons/vue/24/outline';
 
 import { Bar } from 'vue-chartjs';
 import {
@@ -174,10 +174,8 @@ const props = defineProps({
   }
 });
 
-// New ref for view mode: 'list' or 'chart' for suggestedPaths
-const suggestedPathsViewMode = ref('list'); // Default to list view
+const suggestedPathsViewMode = ref('list');
 
-// Map academic profile codes to Heroicons
 const getAcademicProfileIcon = (code) => {
   switch (code) {
     case 'Scientifique': return AcademicCapIcon;
@@ -218,9 +216,9 @@ const getChartData = (suggestions, title) => {
   });
 
   const backgroundColors = data.map(val => {
-    if (val >= 80) return 'rgba(34, 197, 94, 0.8)'; // Green
-    if (val >= 60) return 'rgba(251, 146, 60, 0.8)'; // Orange
-    return 'rgba(239, 68, 68, 0.8)'; // Red
+    if (val >= 80) return 'rgba(34, 197, 94, 0.8)';
+    if (val >= 60) return 'rgba(251, 146, 60, 0.8)';
+    return 'rgba(239, 68, 68, 0.8)';
   });
 
   const borderColors = data.map(val => {

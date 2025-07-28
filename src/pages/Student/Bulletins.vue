@@ -153,9 +153,8 @@ const filterClassId = ref('all');
 const sortOrder = ref('latest');
 const viewMode = ref('card'); // 'card' or 'list'
 
-// --- Computed Properties ---
+// --- Computed ---
 const availableClassesForFilter = computed(() => {
-  // Now, collect unique classIds directly from bulletins
   const uniqueClassIds = new Set(bulletins.value.map(b => b.classId).filter(id => id));
   return Array.from(uniqueClassIds).map(id => {
     const classInfo = availableClasses.value.find(c => c.id === id);
@@ -166,12 +165,10 @@ const availableClassesForFilter = computed(() => {
 const filteredAndSortedBulletins = computed(() => {
   let filtered = bulletins.value;
 
-  // Filter by class
   if (filterClassId.value !== 'all') {
-    filtered = filtered.filter(b => b.classId === filterClassId.value); // Changed to b.classId
+    filtered = filtered.filter(b => b.classId === filterClassId.value);
   }
 
-  // Sort
   return [...filtered].sort((a, b) => {
     if (sortOrder.value === 'latest') {
       return b.updatedAt.getTime() - a.updatedAt.getTime();
@@ -188,16 +185,6 @@ const filteredAndSortedBulletins = computed(() => {
     }
     return 0;
   });
-});
-
-const breadcrumbItems = computed(() => {
-  const items = [{ label: 'Mes Bulletins', to: 'list', icon: DocumentTextIcon }];
-  if (viewingBulletinId.value) {
-    const currentBulletin = bulletins.value.find(b => b.id === viewingBulletinId.value);
-    const bulletinLabel = currentBulletin ? `Bulletin ${currentBulletin.semester} (${currentBulletin.year})` : 'Détails du Bulletin';
-    items.push({ label: bulletinLabel });
-  }
-  return items;
 });
 
 // --- Methods ---
@@ -240,17 +227,15 @@ const viewSingleBulletin = (bulletinId) => {
 
 const cancelBulletinView = async () => {
     viewingBulletinId.value = null;
-    await loadBulletinsAndClasses(); // Reload data when returning to list to reflect any changes
+    await loadBulletinsAndClasses();
 }
 
-// --- Lifecycle ---
 onMounted(() => {
   loadBulletinsAndClasses();
 });
 </script>
 
 <style scoped>
-/* Custom scrollbar for better visual on overflow */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }

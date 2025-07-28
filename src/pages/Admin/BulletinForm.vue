@@ -389,7 +389,7 @@ watch(() => props.initialData, async (newVal) => {
   await loadAvailableSubjects();
   await loadAvailableClassesForBulletin();
   await loadStudentClassAndSchool();
-  await loadAvailableTeachers(); // Load teachers for selection (if admin)
+  await loadAvailableTeachers();
 
   if (newVal) {
     // Editing existing bulletin: populate form with bulletin data

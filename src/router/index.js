@@ -15,10 +15,12 @@ import AdminDashboard from '../pages/Admin/Dashboard.vue'
 import UserManagement from '../pages/Admin/UserManagement.vue'
 import AdminSettings from '../pages/Admin/Settings.vue'
 
-// Layout
-import AppLayout from '../components/Layout/AppLayout.vue'
+// Teacher Pages
 import TeacherDashboard from '../pages/Teacher/TeacherDashboard.vue'
 import TeacherStudents from '../pages/Teacher/TeacherStudents.vue'
+
+// Layout
+import AppLayout from '../components/Layout/AppLayout.vue'
 
 const routes = [
   {
@@ -127,10 +129,23 @@ router.beforeEach(async (to, from, next) => {
   } else if (to.meta.requiresGuest && authStore.user) {
     next('/dashboard')
   } else if (to.meta.role && authStore.user?.role !== to.meta.role) {
-    next('/unauthorized')
+    next(getDashboardPath(authStore.user.role)) 
   } else {
     next()
   }
 })
+
+function getDashboardPath(role) {
+  switch (role) {
+    case 'admin':
+      return '/admin/dashboard'
+    case 'teacher':
+      return '/teacher/dashboard'
+    case 'student':
+      return '/dashboard'
+    default:
+      return '/unauthorized'
+  }
+}
 
 export default router
