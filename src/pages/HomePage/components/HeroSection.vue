@@ -4,12 +4,12 @@
         </div>
         <div class="absolute inset-0 z-0 pattern-dots opacity-10"></div>
         <div class="flex flex-col items-center gap-4 relative z-10 text-white max-w-6xl px-4 animate-fade-in-up">
+            <div class="absolute bottom-[-200px]">
+                <HeroTwoAnimated class="w-[800px] opacity-50"/>
+            </div>
             <h1 class="text-5xl md:text-7xl font-extrabold text-gray-600 leading-tight mb-4 drop-shadow-sm">
                 L'orientation <span class="text-indigo-600">scolaire</span> rendue <span class="text-indigo-600">intelligente</span> et accessible.
             </h1>
-            <div class="absolute left-[-200px] top-[-200px]">
-                <HeroAnimated class="w-[400px]"/>
-            </div>
             <p class="text-lg md:text-xl mb-10 text-gray-700 max-w-2xl mx-auto">
                 Optimisez le parcours de vos élèves avec l'Intelligence Artificielle et un suivi personnalisé pour un
                 avenir prometteur.
@@ -35,7 +35,7 @@
 
 <script setup>
 import { SparklesIcon, UsersIcon } from '@heroicons/vue/24/outline'; // Adjust path and import relevant icons
-import HeroAnimated from '../../../assets/svg/heroAnimated.vue';
+import HeroTwoAnimated from '../../../assets/svg/hero2Animated.vue';
 
 </script>
 
