@@ -10,7 +10,7 @@
                     une
                     interface intuitive et des outils puissants.
                 </p>
-                <div class="w-1/2 h-1 bg-gray-900 rounded"></div>
+                <div class="w-1/2 h-0.5 bg-gray-300 rounded"></div>
             </div>
 
             <!-- Youtube -->
