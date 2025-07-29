@@ -14,10 +14,10 @@
         </h2>
         <div class="flex space-x-2">
           <template v-if="!viewingBulletinId">
-            <Button variant="outline" @click="openEditFormForDetails">
+            <Button v-if="!hideEditStudent" variant="outline" @click="openEditFormForDetails">
               <PencilIcon class="h-4 w-4 mr-2" /> Éditer l'étudiant
             </Button>
-            <Button variant="danger" @click="confirmDeleteStudent">
+            <Button v-if="!hideDeleteStudent" variant="danger" @click="confirmDeleteStudent">
               <TrashIcon class="h-4 w-4 mr-2" /> Supprimer l'étudiant
             </Button>
           </template>
@@ -41,8 +41,9 @@
               <p><strong>Nom complet:</strong> {{ student.profile.firstName }} {{ student.profile.lastName }}</p>
               <p><strong>Email:</strong> {{ student.email }}</p>
               <p><strong>Date de naissance:</strong> {{ formatDate(student.profile.dateOfBirth) }}</p>
-              <p><strong>Classe actuelle:</strong> {{ student.profile.classDisplayName }}</p> 
-              <p><strong>Moyenne générale:</strong> {{ student.profile.averageGrade || 'N/A' }}/20</p>
+              <p><strong>Classe actuelle:</strong> {{ student.profile.classDisplayName }}</p>
+              <p><strong>Moyenne générale (bulletin):</strong> {{ student.profile.averageGrade || 'N/A' }}/20</p>
+              <p><strong>Moyenne générale (globale):</strong> {{ student.profile.overallAverage !== undefined && student.profile.overallAverage !== null ? `${student.profile.overallAverage}/20` : 'N/A' }}</p>
               <p><strong>Niveau:</strong> {{ student.profile.level || 'Non défini' }}</p>
               <p><strong>Code d'inscription:</strong> <span class="font-mono bg-gray-100 px-1 rounded">{{ student.profile.registrationCode }}</span></p>
               <p><strong>Inscrit le:</strong> {{ formatDate(student.createdAt) }}</p>
@@ -85,7 +86,7 @@
         <Card class="mt-8">
           <h3 class="text-xl font-bold text-gray-900 mb-4">Bulletins de l'Étudiant</h3>
           <div class="flex justify-end mb-4">
-            <Button @click="createNewBulletin" :disabled="creatingBulletin">
+            <Button v-if="!hideEditStudent" @click="createNewBulletin" :disabled="creatingBulletin">
               <PlusIcon class="h-4 w-4 mr-2" />
               {{ creatingBulletin ? 'Création...' : 'Ajouter un bulletin' }}
             </Button>
@@ -110,7 +111,7 @@
                 <Button size="sm" variant="outline" @click="editBulletin(bulletin.id)">
                   <PencilIcon class="h-4 w-4 mr-2" /> Modifier
                 </Button>
-                <Button size="sm" variant="danger" @click="confirmDeleteBulletin(bulletin.id)">
+                <Button v-if="!hideEditStudent" size="sm" variant="danger" @click="confirmDeleteBulletin(bulletin.id)">
                   <TrashIcon class="h-4 w-4 mr-2" /> Supprimer
                 </Button>
               </div>
@@ -125,7 +126,7 @@
           :student-id="props.studentId" 
           @open-edit-bulletin="openEditBulletinFromViewer" 
           @has-changes="setBulletinViewerHasChanges"
-        />
+          :hide-edit-button="hideEditStudent" />
       </template>
     </div>
     
@@ -137,9 +138,10 @@
       v-if="showBulletinFormModal"
       :initial-data="editingBulletinData"
       :student-id="studentId"
+      :student-current-class-id="student?.profile?.class"
       @submit="handleBulletinSubmit"
-      @cancel="cancelBulletinForm"
-      :available-classes-for-bulletin="availableClasses" />
+      @cancel="showBulletinFormModal = false"
+    />
   </div>
 </template>
 
@@ -153,21 +155,30 @@ import LoadingSpinner from '../../components/UI/LoadingSpinner.vue';
 import BulletinViewer from './BulletinViewer.vue';
 import { useConfirm } from '../../composables/useConfirm';
 
-import { PencilIcon, TrashIcon, PlusIcon, EyeIcon, ArrowUturnLeftIcon } from '@heroicons/vue/24/outline'
+import { PencilIcon, TrashIcon, PlusIcon, EyeIcon, ArrowUturnLeftIcon, DocumentPlusIcon } from '@heroicons/vue/24/outline' // Add DocumentPlusIcon
 
 const props = defineProps({
   studentId: {
     type: String,
     required: true
+  },
+  hideEditStudent: {
+    type: Boolean,
+    default: false
+  },
+  hideDeleteStudent: {
+    type: Boolean,
+    default: false
   }
-})
+});
 
 const emit = defineEmits([
   'close', // To go back to student list
   'student-updated',
   'student-deleted',
-  'open-edit-student', // To open student edit form from here
-  'has-changes' // Propagate unsaved changes up to parent (UserManagement)
+  'open-edit-student', // To open student edit form from here (Admin only)
+  'has-changes', // Propagate unsaved changes up to parent (UserManagement)
+  'open-fill-bulletin' // NEW EMIT: To allow teacher to open bulletin form from details panel header
 ]);
 
 const { showConfirm, showAlert } = useConfirm();
@@ -186,8 +197,7 @@ const viewingBulletinId = ref(null);
 const panelHasChanges = ref(false);
 const bulletinViewerHasChanges = ref(false);
 
-// NEW: Ref to store all available classes for mapping bulletin.classId to name
-const availableClasses = ref([]);
+const availableClasses = ref([]); // Stores all classes from settings, used for mapping IDs to names
 
 const hasChanges = computed(() => {
     return panelHasChanges.value || bulletinViewerHasChanges.value;
@@ -213,7 +223,6 @@ const formatDate = (dateValue) => {
   return date.toLocaleDateString("fr-FR")
 }
 
-// NEW: Helper function to get class name from ID
 const getClassNameById = (classId) => {
   const classe = availableClasses.value.find(c => c.id === classId);
   return classe ? classe.name : 'Classe inconnue';
@@ -232,13 +241,11 @@ const loadStudentDetails = async () => {
     const fetchedStudent = await FirebaseService.getUserById(props.studentId);
     if (fetchedStudent) {
       student.value = fetchedStudent;
-      // The student.profile.classDisplayName is for the student's current class
       if (student.value.profile.class) {
         const classInfo = await FirebaseService.getClassById(student.value.profile.class);
         student.value.profile.classDisplayName = classInfo ? classInfo.name : student.value.profile.class;
       }
 
-      // NEW: Fetch all classes for the getClassNameById helper
       const allClasses = await FirebaseService.getAllClasses();
       availableClasses.value = allClasses;
 
@@ -279,10 +286,12 @@ const loadSchoolDetails = async () => {
 }
 
 const openEditFormForDetails = () => {
+  // This button is only shown for Admin.
   emit('open-edit-student', student.value);
 };
 
 const confirmDeleteStudent = async () => {
+  // This button is only shown for Admin.
   const confirmed = await showConfirm(
     'Confirmation de désactivation',
     'Êtes-vous sûr de vouloir désactiver ce compte étudiant ? Cela le rendra inactif et il ne pourra plus se connecter.',
@@ -297,7 +306,7 @@ const confirmDeleteStudent = async () => {
       emit('student-deleted');
     } catch (err) {
       console.error("Error deactivating student:", err);
-      await showAlert('Erreur', 'Erreur lors de la désactivation de l\'étudiant: ' + err.message, 'Compris');
+      showAlert('Erreur', 'Erreur lors de la désactivation de l\'étudiant: ' + err.message, 'Compris');
     }
   }
 };
@@ -307,7 +316,6 @@ const createNewBulletin = async () => {
   try {
     const newBulletinId = await FirebaseService.createBulletin({
       studentId: props.studentId,
-      classId: student.value && student.value.profile?.school,
       year: new Date().getFullYear().toString(),
       semester: `Nouveau Bulletin (${bulletins.value.length + 1})`,
       generalAverage: null,
@@ -320,10 +328,10 @@ const createNewBulletin = async () => {
       subjects: []
     });
     await showAlert('Succès', `Nouveau bulletin créé avec l'ID: ${newBulletinId}`, 'Ok');
-    await loadStudentDetails(); // Reload to reflect the new empty bulletin
+    await loadStudentDetails();
   } catch (err) {
     console.error("Error creating new bulletin:", err);
-    await showAlert('Erreur', "Erreur lors de la création du bulletin: " + err.message, 'Compris');
+    showAlert('Erreur', "Erreur lors de la création du bulletin: " + err.message, 'Compris');
   } finally {
     creatingBulletin.value = false;
   }
@@ -344,18 +352,18 @@ const editBulletin = async (bulletinId) => {
     if (editingBulletinData.value) {
       showBulletinFormModal.value = true;
     } else {
-      await showAlert('Erreur', "Bulletin non trouvé.", 'Ok');
+      showAlert('Erreur', "Bulletin non trouvé.", 'Ok');
     }
   } catch (err) {
     console.error("Error fetching bulletin for edit:", err);
-    await showAlert('Erreur', "Erreur lors du chargement du bulletin pour modification.", 'Compris');
+    showAlert('Erreur', "Erreur lors du chargement du bulletin pour modification.", 'Compris');
   }
 };
 
 const openEditBulletinFromViewer = (bulletinData) => {
     editingBulletinData.value = bulletinData;
     showBulletinFormModal.value = true;
-}
+};
 
 const handleBulletinSubmit = async () => {
   await showAlert('Succès', 'Bulletin mis à jour avec succès !', 'Ok');
@@ -382,7 +390,7 @@ const confirmDeleteBulletin = async (bulletinId) => {
       await loadStudentDetails();
     } catch (err) {
       console.error("Error deleting bulletin:", err);
-      await showAlert('Erreur', 'Erreur lors de la suppression du bulletin: ' + err.message, 'Compris');
+      showAlert('Erreur', 'Erreur lors de la suppression du bulletin: ' + err.message, 'Compris');
     }
   }
 };
@@ -394,6 +402,6 @@ const setBulletinViewerHasChanges = (hasChanges) => {
 watch(() => props.studentId, loadStudentDetails, { immediate: true });
 
 onMounted(() => {
-  // loadStudentDetails handles initial data loading
+  // Initial data loading is handled by watch
 });
 </script>
