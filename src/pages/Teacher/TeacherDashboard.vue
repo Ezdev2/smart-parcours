@@ -1,3 +1,4 @@
+<!-- TeacherDashboard.vue -->
 <template>
   <div class="space-y-6">
     <div class="flex justify-between items-center">
@@ -14,23 +15,29 @@
 
     <div v-else class="flex flex-col gap-6">
       <Card>
-        <h2 class="text-xl font-semibold text-gray-900 mb-2">Bienvenue, {{ user?.profile?.firstName }} {{ user?.profile?.lastName }} !</h2>
-        <p class="text-gray-600 mb-4">Voici un aperçu de vos classes et de l'activité de vos élèves.</p>
-        <div class="text-sm text-gray-700 space-y-1">
-            <div class="flex gap-2">
-              <p><strong>Vos classes assignées :</strong></p>
-              <p v-if="user?.profile?.classes?.length > 0">
-                <span v-for="(className, index) in classList" :key="index">
-                  {{ className }}, {{ ' ' }}
-                </span>
-              </p>
-              <p v-else class="text-gray-500">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900 mb-2">Bienvenue, {{ user?.profile?.firstName }} {{
+              user?.profile?.lastName }} !</h2>
+            <p class="text-gray-600 mb-4">Voici un aperçu de vos classes et de l'activité de vos élèves.</p>
+            <div class="text-sm text-gray-700 space-y-1">
+              <div class="flex gap-2">
+                <p><strong>Vos classes assignées :</strong></p>
+                <p v-if="user?.profile?.classes?.length > 0">
+                  <span v-for="(className, index) in classList" :key="index">
+                    {{ className }}, {{ ' ' }}
+                  </span>
+                </p>
+                <p v-else class="text-gray-500">
                   Aucune classe assignée.
-              </p>
+                </p>
+              </div>
+
+              <p v-if="schoolName"><strong>École :</strong> {{ schoolName }}</p>
+              <p v-if="principalName"><strong>Directeur(trice) :</strong> {{ principalName }}</p>
             </div>
-            
-            <p v-if="schoolName"><strong>École :</strong> {{ schoolName }}</p>
-            <p v-if="principalName"><strong>Directeur(trice) :</strong> {{ principalName }}</p>
+          </div>
+          <img width="150" :src="schoolLogo" alt="logo">
         </div>
       </Card>
 
@@ -93,21 +100,18 @@
       </Card>
     </div>
 
-    <SelectStudentForBulletinModal
-        v-if="showSelectStudentModal"
-        :teacher-id="user?.id"
-        @student-selected="handleStudentSelectedForBulletin"
-        @cancel="showSelectStudentModal = false"
-    />
+    <SelectStudentForBulletinModal v-if="showSelectStudentModal" :teacher-id="user?.id"
+      @student-selected="handleStudentSelectedForBulletin" @cancel="showSelectStudentModal = false" />
 
-    <BulletinForm
-        v-if="showBulletinFormModal"
-        :student-id="selectedStudentForBulletin?.id"
-        :student-current-class-id="selectedStudentForBulletin?.profile?.class"
-        :initial-data="null"
-        @submit="handleBulletinFormSubmit"
-        @cancel="showBulletinFormModal = false"
-    />
+    <!-- Bulletin Selection Modal for existing bulletins -->
+    <BulletinSelectionModal v-if="showBulletinSelectionModal" :student="selectedStudentForBulletin"
+      :existing-bulletins="selectedStudentForBulletin?.existingBulletins || []"
+      @bulletin-selected="handleBulletinSelected" @create-new="handleCreateNewBulletin"
+      @cancel="showBulletinSelectionModal = false" />
+
+    <BulletinForm v-if="showBulletinFormModal" :student-id="selectedStudentForBulletin?.id"
+      :student-current-class-id="selectedStudentForBulletin?.profile?.class" :initial-data="selectedBulletinData"
+      @submit="handleBulletinFormSubmit" @cancel="showBulletinFormModal = false" />
 
     <ConfirmDialog />
   </div>
@@ -124,6 +128,7 @@ import Button from '../../components/UI/Button.vue'
 import LoadingSpinner from '../../components/UI/LoadingSpinner.vue'
 import ConfirmDialog from '../../components/UI/ConfirmDialog.vue'
 import SelectStudentForBulletinModal from './SelectStudentForBulletinModal.vue'
+import BulletinSelectionModal from './BulletinSelectionModal.vue'
 import BulletinForm from '../Admin/BulletinForm.vue'
 
 // Heroicons
@@ -147,11 +152,14 @@ const dashboardStats = ref({
 const recentActivities = ref([])
 
 const schoolName = ref('');
+const schoolLogo = ref('');
 const principalName = ref('');
 
 // For bulletin creation workflow
 const showSelectStudentModal = ref(false)
+const showBulletinSelectionModal = ref(false)
 const selectedStudentForBulletin = ref(null)
+const selectedBulletinData = ref(null)
 const showBulletinFormModal = ref(false)
 
 // --- Data Loading ---
@@ -173,7 +181,7 @@ const loadDashboardData = async () => {
     const myStudentsOverallAverages = myStudents
       .filter(s => s.profile.averageGrade !== undefined && s.profile.averageGrade !== null)
       .map(s => parseFloat(s.profile.averageGrade));
-    
+
     if (myStudentsOverallAverages.length > 0) {
       const sumAverages = myStudentsOverallAverages.reduce((sum, avg) => sum + avg, 0);
       dashboardStats.value.averageMyStudents = parseFloat((sumAverages / myStudentsOverallAverages.length).toFixed(2));
@@ -191,22 +199,23 @@ const loadDashboardData = async () => {
 
     // Fetch School and Principal Information
     if (user.value.profile?.school) {
-        const adminSettings = await FirebaseService.getOrCreateSettingsForAdmin(user.value.profile.school);
-        if (adminSettings) {
-            schoolName.value = adminSettings.name || 'Nom de l\'Établissement';
-            const principalUser = await FirebaseService.getUserById(adminSettings.admin);
-            if (principalUser) {
-                principalName.value = `${principalUser.profile?.firstName || ''} ${principalUser.profile?.lastName || ''}`;
-            } else {
-                principalName.value = 'Non renseigné';
-            }
+      const adminSettings = await FirebaseService.getOrCreateSettingsForAdmin(user.value.profile.school);
+      if (adminSettings) {
+        schoolName.value = adminSettings.name || 'Nom de l\'Établissement';
+        schoolLogo.value = adminSettings.logoUrl || 'Logo de l\'établissement';
+        const principalUser = await FirebaseService.getUserById(adminSettings.admin);
+        if (principalUser) {
+          principalName.value = `${principalUser.profile?.firstName || ''} ${principalUser.profile?.lastName || ''}`;
         } else {
-            schoolName.value = 'Nom de l\'Établissement';
-            principalName.value = 'Non renseigné';
+          principalName.value = 'Non renseigné';
         }
-    } else {
-        schoolName.value = 'Non renseigné';
+      } else {
+        schoolName.value = 'Nom de l\'Établissement';
         principalName.value = 'Non renseigné';
+      }
+    } else {
+      schoolName.value = 'Non renseigné';
+      principalName.value = 'Non renseigné';
     }
 
   } catch (err) {
@@ -231,26 +240,48 @@ const fetchAssignedClasses = async () => {
     classList.value = classNames
   }
 }
+
 // --- Bulletin Filling Workflow ---
 const openFillBulletinModal = () => {
-    // Open a modal to select a student from the teacher's assigned classes
-    showSelectStudentModal.value = true;
+  // Open a modal to select a student from the teacher's assigned classes
+  showSelectStudentModal.value = true;
 };
 
 const handleStudentSelectedForBulletin = (student) => {
-    selectedStudentForBulletin.value = student;
-    showSelectStudentModal.value = false; // Close selection modal
-    showBulletinFormModal.value = true; // Open BulletinForm
+  selectedStudentForBulletin.value = student;
+  showSelectStudentModal.value = false; // Close selection modal
+
+  // Check if student has existing bulletins
+  if (student.existingBulletins && student.existingBulletins.length > 0) {
+    // Show bulletin selection modal
+    showBulletinSelectionModal.value = true;
+  } else {
+    // No existing bulletins, create new one
+    selectedBulletinData.value = null;
+    showBulletinFormModal.value = true;
+  }
+};
+
+const handleBulletinSelected = (bulletin) => {
+  selectedBulletinData.value = bulletin;
+  showBulletinSelectionModal.value = false;
+  showBulletinFormModal.value = true;
+};
+
+const handleCreateNewBulletin = () => {
+  selectedBulletinData.value = null;
+  showBulletinSelectionModal.value = false;
+  showBulletinFormModal.value = true;
 };
 
 const handleBulletinFormSubmit = async () => {
-    // This is called from BulletinForm after submission
-    showBulletinFormModal.value = false; // Close BulletinForm
-    selectedStudentForBulletin.value = null; // Clear selected student
-    await loadDashboardData(); // Refresh dashboard stats
-    showAlert('Succès', 'Bulletin sauvegardé avec succès!', 'Ok');
+  // This is called from BulletinForm after submission
+  showBulletinFormModal.value = false; // Close BulletinForm
+  selectedStudentForBulletin.value = null; // Clear selected student
+  selectedBulletinData.value = null; // Clear selected bulletin
+  await loadDashboardData(); // Refresh dashboard stats
+  showAlert('Succès', 'Bulletin sauvegardé avec succès!', 'Ok');
 };
-
 
 // --- Lifecycle ---
 onMounted(() => {

@@ -4,6 +4,7 @@
       :has-button="true"
       :has-icon="true"
       @on-click="gotoRecommendations" 
+      title="Tableau de bord - Etudiant"
       btn-text="Analyser mon profil avec l'IA"
       :loading="loading"
       description="Voici un résumé de votre parcours et de vos recommandations d'orientation."
@@ -19,6 +20,28 @@
     </div>
 
     <div v-else class="flex flex-col gap-6">
+      <Card>
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900 mb-2">Bienvenue, {{ user?.profile?.firstName }} {{
+              user?.profile?.lastName }} !</h2>
+            <p class="text-gray-600 mb-4">Voici un résumé de votre école</p>
+            <div class="text-sm text-gray-700 space-y-1">
+              <div class="flex gap-2">
+                <p><strong>Classe actuelle :</strong></p>
+                <p>
+                    {{ className }}
+                </p>
+              </div>
+
+              <p v-if="schoolName"><strong>École :</strong> {{ schoolName }}</p>
+              <p v-if="principalName"><strong>Directeur(trice) :</strong> {{ principalName }}</p>
+            </div>
+          </div>
+          <img width="150" :src="schoolLogo" alt="logo">
+        </div>
+      </Card>
+
       <StatsOverview 
         :user="user" 
         :bulletins="bulletins" 
@@ -42,6 +65,7 @@ import { FirebaseService } from '../../services/firebaseService'
 
 import TitlePage from '../../components/UI/Title.vue'
 import LoadingSpinner from '../../components/UI/LoadingSpinner.vue'
+import Card from '../../components/UI/Card.vue'
 
 import StatsOverview from './Dashboard/StatsOverview.vue'
 import RecommendationSection from './Dashboard/RecommendationSection.vue'
@@ -63,17 +87,10 @@ const dashboardStats = ref({})
 const bulletins = ref([])
 const latestRecommendation = ref(null)
 
-const recommendedFields = ref([
-  'Ingénierie informatique',
-  'Sciences physiques',
-  'Mathématiques appliquées'
-])
-
-const strongestSubjects = ref([
-  { subject: 'Mathématiques', grade: 16.5 },
-  { subject: 'Physique', grade: 17.0 },
-  { subject: 'Informatique', grade: 16.8 }
-])
+const schoolName = ref('');
+const schoolLogo = ref('');
+const principalName = ref('');
+const className = ref('')
 
 const chartData = computed(() => {
   if (!bulletins.value || bulletins.value.length === 0) {
@@ -151,6 +168,33 @@ const loadDashboardData = async () => {
     // Prepare stats for StatsOverview
     const totalBulletinsCount = fetchedBulletins.length;
     const overallAvg = user.value.profile?.averageGrade || 'N/A';
+
+    // Get Class name and level
+    if (user.value.profile?.class) {
+      const classById = await FirebaseService.getClassById(user.value.profile?.class)
+      className.value = classById.name + " (" + classById.level + ")";
+    }
+
+    // Fetch School and Principal Information
+    if (user.value.profile?.school) {
+      const adminSettings = await FirebaseService.getOrCreateSettingsForAdmin(user.value.profile.school);
+      if (adminSettings) {
+        schoolName.value = adminSettings.name || 'Nom de l\'Établissement';
+        schoolLogo.value = adminSettings.logoUrl || 'Logo de l\'établissement';
+        const principalUser = await FirebaseService.getUserById(adminSettings.admin);
+        if (principalUser) {
+          principalName.value = `${principalUser.profile?.firstName || ''} ${principalUser.profile?.lastName || ''}`;
+        } else {
+          principalName.value = 'Non renseigné';
+        }
+      } else {
+        schoolName.value = 'Nom de l\'Établissement';
+        principalName.value = 'Non renseigné';
+      }
+    } else {
+      schoolName.value = 'Non renseigné';
+      principalName.value = 'Non renseigné';
+    }
 
     dashboardStats.value = {
       totalBulletins: totalBulletinsCount,

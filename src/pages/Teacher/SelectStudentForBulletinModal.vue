@@ -1,3 +1,4 @@
+<!-- SelectStudentForBulletinModal.vue -->
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
     <Card class="relative w-full max-w-lg p-6 overflow-y-auto max-h-[90vh]">
@@ -39,6 +40,10 @@
                 :class="{'bg-blue-100': selectedStudent?.id === student.id}">
               <p class="font-medium text-gray-900">{{ student.profile.firstName }} {{ student.profile.lastName }}</p>
               <p class="text-sm text-gray-600">{{ student.email }} (Classe: {{ student.profile.classDisplayName }})</p>
+              <!-- Show existing bulletins count -->
+              <p class="text-xs text-blue-600 mt-1" v-if="student.bulletinsCount > 0">
+                {{ student.bulletinsCount }} bulletin(s) existant(s)
+              </p>
             </li>
             <li v-if="filteredStudents.length === 0 && searchTerm" class="p-3 text-center text-gray-500">
                 Aucun élève ne correspond à votre recherche.
@@ -104,7 +109,29 @@ const loadStudents = async () => {
     }
     // The FirebaseService.getStudentsForTeacher(props.teacherId) already filters by assignedClasses internally.
     const fetchedStudents = await FirebaseService.getStudentsForTeacher(props.teacherId);
-    students.value = fetchedStudents;
+    
+    // Load bulletins count for each student
+    const studentsWithBulletins = await Promise.all(
+      fetchedStudents.map(async (student) => {
+        try {
+          const bulletins = await FirebaseService.getBulletinsByStudent(student.id);
+          return {
+            ...student,
+            bulletinsCount: bulletins.length,
+            existingBulletins: bulletins
+          };
+        } catch (err) {
+          console.error(`Error loading bulletins for student ${student.id}:`, err);
+          return {
+            ...student,
+            bulletinsCount: 0,
+            existingBulletins: []
+          };
+        }
+      })
+    );
+    
+    students.value = studentsWithBulletins;
   } catch (err) {
     console.error("Error loading students for teacher:", err);
     error.value = "Erreur lors du chargement de la liste des élèves: " + err.message;

@@ -4,9 +4,6 @@
         <h1 v-if="title" class="text-2xl font-bold text-gray-900">
           {{ title }}
         </h1>
-        <h1 v-else class="text-2xl font-bold text-gray-900">
-          Bonjour {{ user?.profile.firstName }} !
-        </h1>
         <p class="text-gray-600">
           {{ description }}
         </p>

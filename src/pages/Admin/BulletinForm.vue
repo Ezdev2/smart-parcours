@@ -1,10 +1,13 @@
+<!-- Bulletin form -->
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
     <Card class="relative w-full max-w-4xl p-6 overflow-y-auto max-h-[90vh]">
       <button @click="$emit('cancel')" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
         <XMarkIcon class="h-6 w-6" />
       </button>
-      <h2 class="text-xl font-bold mb-4">{{ initialData ? 'Modifier le Bulletin' : 'Ajouter un Bulletin' }}</h2>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold">{{ initialData ? 'Modifier le Bulletin' : 'Ajouter un Bulletin' }}</h2>
+      </div>
       
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -12,39 +15,43 @@
             <label class="block text-sm font-medium text-gray-700">Année Académique</label>
             <input type="text" v-model="formData.year" required 
               placeholder="Ex: 2024-2025"
-              :readonly="isTeacherRole && initialData"
-              :class="{'bg-gray-100': isTeacherRole && initialData}"
+              :readonly="isTeacherRole"
+              :class="{'bg-gray-100 cursor-not-allowed': isTeacherRole}"
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+            <p v-if="isTeacherRole" class="mt-1 text-xs text-gray-500">Non modifiable par les enseignants.</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700">Période (Semestre/Trimestre)</label>
             <input type="text" v-model="formData.semester" required 
               placeholder="Ex: Semestre 1, Trimestre 2"
-              :readonly="isTeacherRole && initialData"
-              :class="{'bg-gray-100': isTeacherRole && initialData}"
+              :readonly="isTeacherRole"
+              :class="{'bg-gray-100 cursor-not-allowed': isTeacherRole}"
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+            <p v-if="isTeacherRole" class="mt-1 text-xs text-gray-500">Non modifiable par les enseignants.</p>
           </div>
         </div>
 
         <div>
           <label class="block text-sm font-medium text-gray-700">Classe du bulletin</label>
           <select v-model="formData.classId" required
-            :readonly="isTeacherRole && initialData"
-            :class="{'bg-gray-100': isTeacherRole && initialData}"
+            :disabled="isTeacherRole"
+            :class="{'bg-gray-100 cursor-not-allowed': isTeacherRole}"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             <option value="">Sélectionner une classe</option>
             <option v-for="classe in availableClassesForBulletin" :key="classe.id" :value="classe.id">
               {{ classe.name }} ({{ classe.level }})
             </option>
           </select>
-          <p class="mt-1 text-xs text-gray-500">La classe associée à ce bulletin spécifique.</p>
+          <p class="mt-1 text-xs text-gray-500">
+            {{ isTeacherRole ? 'Non modifiable par les enseignants.' : 'La classe associée à ce bulletin spécifique.' }}
+          </p>
         </div>
 
         <div>
           <label class="block text-sm font-medium text-gray-700">Professeur Principal</label>
           <template v-if="isTeacherRole">
             <input type="text" :value="teacherFullName" readonly
-                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 text-gray-700" />
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 text-gray-700 cursor-not-allowed" />
             <p class="mt-1 text-xs text-gray-500">Nom de l'enseignant connecté.</p>
           </template>
           <template v-else-if="authStore.user?.role === 'admin'">
@@ -67,7 +74,7 @@
           </template>
           <template v-else>
               <input type="text" :value="formData.professeurPrincipal || 'Non renseigné'" readonly
-                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 text-gray-700" />
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 text-gray-700 cursor-not-allowed" />
               <p class="mt-1 text-xs text-gray-500">Non modifiable pour ce rôle.</p>
           </template>
         </div>
@@ -75,7 +82,7 @@
         <div>
           <label class="block text-sm font-medium text-gray-700">Moyenne Générale</label>
           <input type="number" step="0.1" min="0" max="20" 
-            :value="calculatedGeneralAverage" readonly class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100" />
+            :value="calculatedGeneralAverage" readonly class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 cursor-not-allowed" />
           <p class="mt-1 text-xs text-gray-500">Calculée automatiquement à partir des matières.</p>
         </div>
         
@@ -84,15 +91,16 @@
                 <label class="block text-sm font-medium text-gray-700">Rang dans la classe (Optionnel)</label>
                 <input type="number" min="1" v-model.number="formData.classRank" 
                     placeholder="Ex: 3"
-                    :readonly="isTeacherRole && initialData"
-                    :class="{'bg-gray-100': isTeacherRole && initialData}"
+                    :readonly="isTeacherRole"
+                    :class="{'bg-gray-100 cursor-not-allowed': isTeacherRole}"
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                <p v-if="isTeacherRole" class="mt-1 text-xs text-gray-500">Non modifiable par les enseignants.</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Nombre total d'élèves dans la classe</label>
                 <input type="number" min="1" v-model.number="formData.totalStudents" readonly
                     placeholder="Calculé automatiquement"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100" />
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 cursor-not-allowed" />
                 <p class="mt-1 text-xs text-gray-500">Ce champ est automatiquement calculé.</p>
             </div>
         </div>
@@ -101,24 +109,32 @@
           <label class="block text-sm font-medium text-gray-700">Commentaire Général (Optionnel)</label>
           <textarea v-model="formData.generalComment" rows="3" 
             placeholder="Ex: Bon trimestre, élève sérieux et motivé."
-            :readonly="isTeacherRole && initialData"
-            :class="{'bg-gray-100': isTeacherRole && initialData}"
+            :readonly="isTeacherRole"
+            :class="{'bg-gray-100 cursor-not-allowed': isTeacherRole}"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+          <p v-if="isTeacherRole" class="mt-1 text-xs text-gray-500">Non modifiable par les enseignants.</p>
         </div>
 
         <div>
             <label class="block text-sm font-medium text-gray-700">Commentaire Absences/Vie Scolaire (Optionnel)</label>
             <textarea v-model="formData.absencesComment" rows="2"
                 placeholder="Ex: 2 retards, 1 absence justifiée."
-                :readonly="isTeacherRole && initialData"
-                :class="{'bg-gray-100': isTeacherRole && initialData}"
+                :readonly="isTeacherRole"
+                :class="{'bg-gray-100 cursor-not-allowed': isTeacherRole}"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
-            <p class="mt-1 text-xs text-gray-500">Ce champ est à compléter manuellement pour les retards/absences non gérés par l'application.</p>
+            <p class="mt-1 text-xs text-gray-500">
+              {{ isTeacherRole ? 'Non modifiable par les enseignants.' : 'Ce champ est à compléter manuellement pour les retards/absences non gérés par l\'application.' }}
+            </p>
         </div>
 
         <div class="border-t pt-4 mt-4">
           <div class="flex items-center justify-between mb-3">
-            <h3 class="text-lg font-bold text-gray-800">Notes par Matière</h3>
+            <h3 class="text-lg font-bold text-gray-800">
+              Notes par Matière
+              <span v-if="isTeacherRole" class="text-sm font-normal text-gray-600 ml-2">
+                (Seules les matières peuvent être modifiées)
+              </span>
+            </h3>
             <Button class="mt-6" type="button" @click="addSubject" size="sm" variant="secondary">
               <PlusIcon class="h-4 w-4 mr-1" /> Ajouter une matière
           </Button>
@@ -146,8 +162,7 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Nom de la matière</label>
                   <select v-model="subject.name" 
-                          :disabled="isTeacherRole && initialData"
-                          :class="{'bg-gray-100': isTeacherRole && initialData}"
+                          :disabled="false"
                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                     <option value="">Sélectionner une matière</option>
                     <option v-for="s in availableSubjects" :key="s.id" :value="s.name">
@@ -159,7 +174,7 @@
                   <label class="block text-sm font-medium text-gray-700">Enseignant</label>
                   <template v-if="isTeacherRole">
                     <input type="text" :value="teacherFullName" readonly
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100" />
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-100 cursor-not-allowed" />
                   </template>
                   <template v-else-if="authStore.user?.role === 'admin'">
                     <input type="text" v-model="subject.teacher"
@@ -176,8 +191,7 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Coefficient</label>
                   <select v-model.number="subject.coefficient" 
-                          :disabled="isTeacherRole && initialData"
-                          :class="{'bg-gray-100': isTeacherRole && initialData}"
+                          :disabled="false"
                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                     <option :value="null">Auto (si sélectionné)</option>
                     <option v-for="i in 10" :key="i" :value="i">{{ i }}</option>
@@ -189,16 +203,12 @@
                   <label class="block text-sm font-medium text-gray-700">Moyenne de la Classe (Optionnel)</label>
                   <input type="number" step="0.1" min="0" max="20" v-model.number="subject.classAverage"
                     placeholder="Ex: 14.5"
-                    :readonly="isTeacherRole && initialData"
-                    :class="{'bg-gray-100': isTeacherRole && initialData}"
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Note la plus haute (Optionnel)</label>
                   <input type="number" step="0.1" min="0" max="20" v-model.number="subject.highestGrade"
                     placeholder="Ex: 19.0"
-                    :readonly="isTeacherRole && initialData"
-                    :class="{'bg-gray-100': isTeacherRole && initialData}"
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
                 </div>
               </div>
@@ -225,11 +235,11 @@
 
 <script setup>
 import { reactive, watch, ref, onMounted, computed } from 'vue';
-import { FirebaseService } from '../../services/firebaseService'; // Adjust path
-import Card from '../../components/UI/Card.vue'; // Adjust path
-import Button from '../../components/UI/Button.vue'; // Adjust path
-import { XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline'; // Adjust path
-import { useAuthStore } from '../../stores/auth'; // Adjust path
+import { FirebaseService } from '../../services/firebaseService';
+import Card from '../../components/UI/Card.vue';
+import Button from '../../components/UI/Button.vue';
+import { XMarkIcon, PlusIcon, TrashIcon, DocumentMagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+import { useAuthStore } from '../../stores/auth';
 
 const props = defineProps({
   initialData: {
@@ -307,7 +317,6 @@ const calculatedGeneralAverage = computed(() => {
   }
   return '';
 });
-
 
 // Load all classes from admin settings for the bulletin class dropdown
 const loadAvailableClassesForBulletin = async () => {
@@ -432,7 +441,6 @@ watch(() => props.initialData, async (newVal) => {
     formData.classId = props.studentCurrentClassId || null;
   }
 }, { immediate: true });
-
 
 watch(formData.subjects, (newSubjects) => {
   newSubjects.forEach(subject => {
