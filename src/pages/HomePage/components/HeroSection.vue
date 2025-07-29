@@ -4,7 +4,7 @@
         </div>
         <div class="absolute inset-0 z-0 pattern-dots opacity-10"></div>
         <div class="flex flex-col items-center gap-4 relative z-10 text-white max-w-6xl px-4 animate-fade-in-up">
-            <div class="absolute bottom-[-200px]">
+            <div class="absolute bottom-[-150px]">
                 <HeroTwoAnimated class="w-[800px] opacity-50"/>
             </div>
             <h1 class="text-5xl md:text-7xl font-extrabold text-gray-600 leading-tight mb-4 drop-shadow-sm">
