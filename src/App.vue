@@ -14,3 +14,14 @@ onMounted(() => {
   authStore.initializeAuth()
 })
 </script>
+<style>
+html {
+  scroll-behavior: smooth;
+}
+body {
+  font-family: 'Montserrat', sans-serif;
+}
+/* .container {
+  max-width: 1200px;
+} */
+</style>

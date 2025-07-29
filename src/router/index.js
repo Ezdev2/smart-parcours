@@ -21,8 +21,15 @@ import TeacherStudents from '../pages/Teacher/TeacherStudents.vue'
 
 // Layout
 import AppLayout from '../components/Layout/AppLayout.vue'
+import Home from '../pages/HomePage/Home.vue'
 
 const routes = [
+   {
+    path: '/',
+    name: 'Home',
+    component: Home,
+    meta: { requiresAuth: false }
+  },
   {
     path: '/login',
     name: 'Login',
