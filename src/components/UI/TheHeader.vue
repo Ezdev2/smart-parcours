@@ -3,8 +3,7 @@
     <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center">
         <router-link to="/" class="flex items-center">
-          <img src="@/assets/logo.vue" alt="Smart Parcours Logo" class="h-10 mr-2" /> 
-          <span class="text-2xl font-bold text-indigo-600">Smart Parcours</span>
+          <Logo class="w-1/2" />
         </router-link>
       </div>
 
@@ -36,7 +35,7 @@
           <a href="#services" class="nav-link" @click="closeMenuAndScroll('services')">Nos Services</a>
           <a href="#pricing" class="nav-link" @click="closeMenuAndScroll('pricing')">Tarifs</a>
           <router-link to="/login" @click="mobileMenuOpen = false">
-            <Button variant="outline" size="lg">Connexion</Button>
+            <Button variant="primary" size="lg">Connexion</Button>
           </router-link>
         </nav>
       </div>
@@ -47,10 +46,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import Button from '@/components/UI/Button.vue'; // Adjust path
-import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'; // Adjust path
-// If your logo is an SVG/Vue component, ensure its path is correct:
-// import AppLogo from '@/assets/logo.vue'; 
+import Button from './Button.vue';
+import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline';
+import Logo from '../../assets/logo.vue'
 
 const router = useRouter();
 const scrolled = ref(false);

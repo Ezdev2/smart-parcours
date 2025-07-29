@@ -24,7 +24,7 @@
         </p>
       </div>
       <div class="relative animate-fade-in-on-scroll delay-200">
-        <img src="https://via.placeholder.com/600x400/818CF8/FFFFFF?text=Votre+Histoire" alt="Illustration de l'histoire" class="rounded-xl shadow-2xl" />
+        <img src="https://images.pexels.com/photos/1595391/pexels-photo-1595391.jpeg?_gl=1*1thlf0j*_ga*MTc4MDAwOTUxOC4xNzQ5OTgwMjgw*_ga_8JE65Q40S6*czE3NTM3OTI2MjckbzckZzEkdDE3NTM3OTI2NDAkajQ3JGwwJGgw" alt="Illustration de l'histoire" class="rounded-xl shadow-2xl" />
         </div>
     </div>
   </section>

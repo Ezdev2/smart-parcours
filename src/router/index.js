@@ -22,9 +22,16 @@ import TeacherStudents from '../pages/Teacher/TeacherStudents.vue'
 // Layout
 import AppLayout from '../components/Layout/AppLayout.vue'
 import Home from '../pages/HomePage/Home.vue'
+import TermsAndConditions from '../pages/TermsAndConditions.vue'
 
 const routes = [
-   {
+  {
+    path: '//terms-conditions',
+    name: 'condition',
+    component: TermsAndConditions,
+    meta: { requiresAuth: false }
+  },
+  {
     path: '/',
     name: 'Home',
     component: Home,

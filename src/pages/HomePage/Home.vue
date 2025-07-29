@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TheHeader/>
+    <!-- <TheHeader/> -->
     <HeroSection @add-school="openAddSchoolModal" />
     <VideoDemoSection id="video-demo" />
     <ServicesSection id="services" />
@@ -8,14 +8,12 @@
     <HowItWorksSection id="how-it-works" />
     <PricingSection id="pricing" @add-school="openAddSchoolModal" /> 
     <AddSchoolFormModal v-if="showAddSchoolModal" @close="showAddSchoolModal = false" @submit-success="handleSchoolAdded" />
-    <TheFooter />
+    <!-- <TheFooter /> -->
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import TheHeader from './components/TheHeader.vue';
-import TheFooter from './components/TheFooter.vue';
 
 import HeroSection from './components/HeroSection.vue';
 import VideoDemoSection from './components/VideoDemoSection.vue';
