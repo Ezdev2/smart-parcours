@@ -13,14 +13,14 @@
             </p>
             <div class="flex lg:flex-row flex-col items center gap-6 lg:w-2/3">
                 <button @click="$emit('add-school')"
-                    class="flex gap-4 items-center rounded-full w-full justify-center text-white text-lg font-extrabold bg-indigo-600 px-8 py-5 hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
+                    class="flex gap-4 items-center rounded-full w-full justify-center text-white text-md font-extrabold bg-indigo-600 px-8 py-5 hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
                     <SparklesIcon class="h-8 w-8 text-white" />
                     <span>Inscrire mon Établissement</span>
                 </button>
                 <router-link 
                     to="/login" 
                     @click="mobileMenuOpen = false" 
-                    class="flex gap-4 items-center rounded-full w-full justify-center text-indigo-600 text-lg font-extrabold bg-white border px-8 py-5 hover:shadow-xl transform hover:-translate-y-1 transition duration-300"
+                    class="flex gap-4 items-center rounded-full w-full justify-center text-indigo-600 text-md font-extrabold bg-white border px-8 py-5 hover:shadow-xl transform hover:-translate-y-1 transition duration-300"
                 >
                     <UsersIcon class="h-8 w-8 text-indigo-600" />
                     <span>J'ai un compte</span>
