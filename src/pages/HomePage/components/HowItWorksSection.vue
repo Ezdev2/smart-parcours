@@ -1,6 +1,6 @@
 <template>
-  <section class="py-20 bg-white">
-    <div class="container mx-auto px-4 text-center">
+  <section class="py-40 bg-white">
+    <div class="container flex flex-col gap-6 items-center mx-auto px-4 text-center">
       <h2 class="text-4xl font-bold text-gray-900 mb-12 animate-fade-in-on-scroll">
         Prêts à Transformer l'Orientation ?
         <span class="block text-indigo-600 mt-2">Voici Comment Démarrer.</span>
@@ -8,17 +8,17 @@
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
         <div class="flex flex-col items-center animate-fade-in-on-scroll delay-100">
-          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4 text-blue-600 text-3xl font-bold shadow-md">1</div>
+          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4 text-blue-600 text-3xl font-bold ">1</div>
           <h3 class="text-xl font-semibold text-gray-900 mb-3">Explorez nos outils</h3>
           <p class="text-gray-700 max-w-xs">Découvrez la démo vidéo et toutes les fonctionnalités clés de Smart Parcours.</p>
         </div>
         <div class="flex flex-col items-center animate-fade-in-on-scroll delay-200">
-          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 text-green-600 text-3xl font-bold shadow-md">2</div>
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 text-green-600 text-3xl font-bold ">2</div>
           <h3 class="text-xl font-semibold text-gray-900 mb-3">Contactez-nous pour vous inscrire</h3>
           <p class="text-gray-700 max-w-xs">Cliquez sur le bouton 'Inscrire mon Établissement' et remplissez un court formulaire sécurisé.</p>
         </div>
         <div class="flex flex-col items-center animate-fade-in-on-scroll delay-300">
-          <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4 text-purple-600 text-3xl font-bold shadow-md">3</div>
+          <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4 text-purple-600 text-3xl font-bold ">3</div>
           <h3 class="text-xl font-semibold text-gray-900 mb-3">Accès & Configuration Personnalisés</h3>
           <p class="text-gray-700 max-w-xs">Nous créons votre espace administrateur et vous guidons dans la configuration initiale pour un démarrage rapide.</p>
         </div>

@@ -2,9 +2,9 @@
   <div>
     <!-- <TheHeader/> -->
     <HeroSection @add-school="openAddSchoolModal" />
-    <VideoDemoSection id="video-demo" />
     <ServicesSection id="services" />
-    <WhySmartParcoursSection id="why-smart-parcours" />
+    <VideoDemoSection id="video-demo" />
+    <WhySmartParcoursSection id="why-smart-parcours" @add-school="openAddSchoolModal" />
     <HowItWorksSection id="how-it-works" />
     <PricingSection id="pricing" @add-school="openAddSchoolModal" /> 
     <AddSchoolFormModal v-if="showAddSchoolModal" @close="showAddSchoolModal = false" @submit-success="handleSchoolAdded" />

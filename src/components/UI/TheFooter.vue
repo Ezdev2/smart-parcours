@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
       <div class="mb-4 md:mb-0">
         <router-link to="/" class="flex items-center justify-center md:justify-start">
-          <img src="@/assets/logo.vue" alt="Smart Parcours Logo" class="h-10 mr-2" /> <span class="text-2xl font-bold">Smart Parcours</span>
+          <Logo class="w-1/2" />
         </router-link>
         <p class="text-sm mt-2 opacity-80 max-w-sm">
           Votre partenaire pour une orientation scolaire réussie et une gestion académique optimisée.
@@ -40,8 +40,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-// If you have your logo as an SVG/Vue component:
-// import AppLogo from '@/assets/logo.vue';
+import Logo from '../../assets/logo.vue'
 
 const router = useRouter();
 const currentYear = computed(() => new Date().getFullYear());

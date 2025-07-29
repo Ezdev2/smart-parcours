@@ -25,6 +25,7 @@ html {
 }
 body {
   font-family: 'Inter', 'League Spartan', sans-serif;
+  text-align: start;
 }
 /* .container {
   max-width: 1200px;
