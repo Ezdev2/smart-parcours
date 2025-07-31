@@ -1,5 +1,5 @@
 <template>
-    <section class="relative py-8 h-screen flex items-center justify-center text-center overflow-hidden">
+    <section class="relative py-8 mt-4 md:h-screen flex items-center justify-center text-center overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-600 opacity-90 animate-gradient-shift">
         </div>
         <div class="absolute inset-0 z-0 pattern-dots opacity-10"></div>
@@ -28,14 +28,12 @@
                     d'expériences sociales, préparant les élèves à un monde en constante évolution.
                 </p>
                 <button @click="$emit('add-school')"
-                    class="flex gap-4 items-center rounded-full w-[fit-content] justify-center text-indigo-600 text-md font-medium bg-white px-12 py-5 hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
+                    class="flex gap-4 items-center rounded-full md:w-[fit-content] justify-center text-indigo-600 text-md font-medium bg-white px-12 md:py-5 py-3 hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
                     <SparklesIcon class="h-8 w-8 text-indigo-600" />
                     <span>Je m'embarque maintenant</span>
                 </button>
             </div>
-            <div class="relative animate-fade-in-on-scroll delay-200">
-                <!-- <img src="https://images.pexels.com/photos/1595391/pexels-photo-1595391.jpeg?_gl=1*1thlf0j*_ga*MTc4MDAwOTUxOC4xNzQ5OTgwMjgw*_ga_8JE65Q40S6*czE3NTM3OTI2MjckbzckZzEkdDE3NTM3OTI2NDAkajQ3JGwwJGgw"
-                    alt="Illustration de l'histoire" class="rounded-xl shadow-2xl" /> -->
+            <div class="relative animate-fade-in-on-scroll delay-200 hidden md:block">
                 <AnimatedImg/>
             </div>
         </div>

@@ -1,5 +1,5 @@
 <template>
-  <section class="py-40 bg-white">
+  <section class="py-20 bg-white">
     <div class="container flex flex-col gap-6 items-center mx-auto px-4 text-center">
       <h2 class="text-4xl font-bold text-gray-900 mb-12 animate-fade-in-on-scroll">
         Prêts à Transformer l'Orientation ?
@@ -26,7 +26,8 @@
 
       <div class="mt-16 animate-fade-in-on-scroll delay-400">
         <router-link to="#" @click.prevent="scrollToAddSchoolSection">
-            <Button variant="primary" size="lg" class="px-8 py-4 text-xl rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
+            <Button variant="primary" class="px-8 py-4 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
+              <BriefcaseIcon class="h-6 w-6" />
                 Inscrire mon Établissement
             </Button>
         </router-link>
@@ -39,6 +40,8 @@
 import Button from '@/components/UI/Button.vue'; // Adjust path
 import { useRouter } from 'vue-router';
 import { onMounted } from 'vue';
+
+import { BriefcaseIcon } from '@heroicons/vue/24/outline';
 
 const router = useRouter();
 

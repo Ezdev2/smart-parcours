@@ -1,5 +1,5 @@
 <template>
-  <section class="py-40 bg-white flex items-center">
+  <section class="py-20 md:mt-20 bg-white flex items-center">
     <div class="container mx-auto px-4">
       <h2 class="text-4xl font-bold text-gray-900 text-center mb-12 animate-fade-in-on-scroll">
         Ce que Smart Parcours offre à votre établissement.

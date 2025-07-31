@@ -1,6 +1,6 @@
 <template>
-    <section class="py-20 bg-white">
-        <div class="container md:grid grid grid-cols-3 gap-4 md:flex-row flex flex-col mx-auto px-4 text-center">
+    <section class="md:py-20 bg-white">
+        <div class="container gap-4 flex flex-col md:grid grid-cols-3 mx-auto px-4 text-center">
             <div class="col-span-1  animate-fade-in-on-scroll delay-200 flex flex-col gap-6 " >
                 <h2 class="text-4xl font-bold text-gray-900 text-start">
                     Découvrez Smart Parcours en Action

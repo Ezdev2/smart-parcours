@@ -12,7 +12,7 @@
         <a href="#services" class="nav-link" @click.prevent="scrollToSection('services')">Nos Services</a>
         <a href="#pricing" class="nav-link" @click.prevent="scrollToSection('pricing')">Tarifs</a>
         <router-link to="/login">
-          <Button variant="outline" size="sm">Connexion</Button>
+          <Button variant="primary" size="sm">Connexion</Button>
         </router-link>
       </div>
 
