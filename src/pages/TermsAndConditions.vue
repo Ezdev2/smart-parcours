@@ -74,3 +74,8 @@
     </div>
   </div>
 </template>
+<style scoped>
+h2 {
+  font-weight: bold;
+}
+</style>
