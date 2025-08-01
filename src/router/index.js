@@ -16,7 +16,7 @@ import UserManagement from '../pages/Admin/UserManagement.vue'
 import AdminSettings from '../pages/Admin/Settings.vue'
 
 // Teacher Pages
-import TeacherDashboard from '../pages/Teacher/TeacherDashboard.vue'
+import TeacherDashboard from '../pages/Teacher/Dashboard.vue'
 import TeacherStudents from '../pages/Teacher/TeacherStudents.vue'
 
 // Layout

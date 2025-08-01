@@ -1,15 +1,8 @@
 <template>
   <div class="space-y-6">
-    <TitlePage 
-      :has-button="true"
-      :has-icon="true"
-      @on-click="gotoRecommendations" 
-      title="Tableau de bord - Etudiant"
-      btn-text="Analyser mon profil avec l'IA"
-      :loading="loading"
-      description="Voici un résumé de votre parcours et de vos recommandations d'orientation."
-      :user="user"
-    >
+    <TitlePage :has-button="true" :has-icon="true" @on-click="gotoRecommendations" title="Tableau de bord - Etudiant"
+      btn-text="Analyser mon profil avec l'IA" :loading="loading"
+      description="Voici un résumé de votre parcours et de vos recommandations d'orientation." :user="user">
       <SparklesIcon class="h-6 w-6 text-white" />
     </TitlePage>
 
@@ -20,40 +13,60 @@
     </div>
 
     <div v-else class="flex flex-col gap-6">
-      <Card>
-        <div class="flex justify-between items-center">
-          <div>
-            <h2 class="text-xl font-semibold text-gray-900 mb-2">Bienvenue, {{ user?.profile?.firstName }} {{
+      <!-- <div
+        class="w-full p-12 rounded-2xl shadow-lg bg-gradient-to-r from-indigo-900 to-indigo-500 relative overflow-hidden">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative">
+          <div class="flex-1 text-center md:text-left">
+            <h2 class="text-3xl font-bold text-white mb-4">Bienvenue, {{ user?.profile?.firstName }} {{
               user?.profile?.lastName }} !</h2>
-            <p class="text-gray-600 mb-4">Voici un résumé de votre école</p>
-            <div class="text-sm text-gray-700 space-y-1">
-              <div class="flex gap-2">
-                <p><strong>Classe actuelle :</strong></p>
-                <p>
-                    {{ className }}
-                </p>
+            <div class="text-base text-gray-200 flex gap-4">
+              <div
+                class="flex flex-col gap-1 sm:gap-2 justify-center md:justify-start py-2 px-4 rounded-2xl bg-white/15">
+                <p class="font-semibold">Classe actuelle</p>
+                <p>{{ className }}</p>
               </div>
-
-              <p v-if="schoolName"><strong>École :</strong> {{ schoolName }}</p>
-              <p v-if="principalName"><strong>Directeur(trice) :</strong> {{ principalName }}</p>
+              <div v-if="schoolName"
+                class="flex flex-col gap-1 sm:gap-2 justify-center md:justify-start py-2 px-4 rounded-2xl bg-white/15">
+                <span class="font-semibold">École</span>
+                <span>{{ schoolName }}</span>
+              </div>
+              <div v-if="principalName"
+                class="flex flex-col gap-1 sm:gap-2 justify-center md:justify-start py-2 px-4 rounded-2xl bg-white/15">
+                <span class="font-semibold">Directeur(trice)</span>
+                <span>{{ principalName }}</span>
+              </div>
             </div>
+
+            <router-link to="/profil"
+              class="mt-6 bg-white hover:bg-indigo-600 text-indigo-900 font-semibold px-6 py-3 rounded-full inline-flex items-center gap-2 transition duration-300">
+              Voir les détails
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                  d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                  clip-rule="evenodd" />
+              </svg>
+            </router-link>
           </div>
-          <img width="150" :src="schoolLogo" alt="logo">
+          <div class="mt-6 md:mt-0">
+            <img width="180" height="180" class="rounded-lg shadow-md" :src="schoolLogo" alt="School Logo" />
+          </div>
         </div>
-      </Card>
+      </div> -->
 
-      <StatsOverview 
-        :user="user" 
-        :bulletins="bulletins" 
-        :dashboard-stats="dashboardStats"
-        :latest-recommendation="latestRecommendation"
+      <UserWelcomeBanner
+        :user="user"
+        :className="className"
+        :schoolName="schoolName"
+        :principalName="principalName"
+        :schoolLogo="schoolLogo"
+        btn-link="/profil"
       />
 
-      <RecommendationSection
-        :latest-recommendation="latestRecommendation"
-        :chart-data="chartData"
-        :chart-options="chartOptions"
-      />
+      <StatsOverview :user="user" :bulletins="bulletins" :dashboard-stats="dashboardStats"
+        :latest-recommendation="latestRecommendation" />
+
+      <RecommendationSection :latest-recommendation="latestRecommendation" :chart-data="chartData"
+        :chart-options="chartOptions" />
     </div>
   </div>
 </template>
@@ -65,7 +78,7 @@ import { FirebaseService } from '../../services/firebaseService'
 
 import TitlePage from '../../components/UI/Title.vue'
 import LoadingSpinner from '../../components/UI/LoadingSpinner.vue'
-import Card from '../../components/UI/Card.vue'
+import UserWelcomeBanner from '../../components/UI/Banner.vue'
 
 import StatsOverview from './Dashboard/StatsOverview.vue'
 import RecommendationSection from './Dashboard/RecommendationSection.vue'
@@ -156,7 +169,7 @@ const loadDashboardData = async () => {
 
     bulletins.value = fetchedBulletins;
     latestRecommendation.value = fetchedRecommendations[0] || null; // Get the most recent one
-    
+
     // Update user store with fresh data, especially for overallAverage
     if (currentUserData) {
       authStore.user = {

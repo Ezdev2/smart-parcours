@@ -1,4 +1,3 @@
-<!-- TeacherDashboard.vue -->
 <template>
   <div class="space-y-6">
     <div class="flex justify-between items-center">
@@ -14,32 +13,15 @@
     </div>
 
     <div v-else class="flex flex-col gap-6">
-      <Card>
-        <div class="flex justify-between items-center">
-          <div>
-            <h2 class="text-xl font-semibold text-gray-900 mb-2">Bienvenue, {{ user?.profile?.firstName }} {{
-              user?.profile?.lastName }} !</h2>
-            <p class="text-gray-600 mb-4">Voici un aperçu de vos classes et de l'activité de vos élèves.</p>
-            <div class="text-sm text-gray-700 space-y-1">
-              <div class="flex gap-2">
-                <p><strong>Vos classes assignées :</strong></p>
-                <p v-if="user?.profile?.classes?.length > 0">
-                  <span v-for="(className, index) in classList" :key="index">
-                    {{ className }}, {{ ' ' }}
-                  </span>
-                </p>
-                <p v-else class="text-gray-500">
-                  Aucune classe assignée.
-                </p>
-              </div>
-
-              <p v-if="schoolName"><strong>École :</strong> {{ schoolName }}</p>
-              <p v-if="principalName"><strong>Directeur(trice) :</strong> {{ principalName }}</p>
-            </div>
-          </div>
-          <img width="150" :src="schoolLogo" alt="logo">
-        </div>
-      </Card>
+      <UserWelcomeBanner
+        :user="user"
+        :classList="classList"
+        :schoolName="schoolName"
+        :principalName="principalName"
+        :schoolLogo="schoolLogo"
+        btn-link="/teacher/students"
+        button-text="Voir mes élèves"
+      />
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
@@ -123,6 +105,7 @@ import { FirebaseService } from '../../services/firebaseService'
 import { useAuthStore } from '../../stores/auth'
 import { useGotoUrl } from '../../composables/useGotoUrl'
 import { useConfirm } from '../../composables/useConfirm'
+import UserWelcomeBanner from '../../components/UI/Banner.vue'
 import Card from '../../components/UI/Card.vue'
 import Button from '../../components/UI/Button.vue'
 import LoadingSpinner from '../../components/UI/LoadingSpinner.vue'
