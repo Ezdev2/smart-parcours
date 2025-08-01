@@ -7,7 +7,7 @@
         </router-link>
       </div>
 
-      <div class="hidden md:flex items-center space-x-6">
+      <div class="hidden md:flex items-center space-x-12">
         <a href="#why-smart-parcours" class="nav-link" @click.prevent="scrollToSection('why-smart-parcours')">Pourquoi SmartParcours ?</a>
         <a href="#services" class="nav-link" @click.prevent="scrollToSection('services')">Nos Services</a>
         <a href="#pricing" class="nav-link" @click.prevent="scrollToSection('pricing')">Tarifs</a>

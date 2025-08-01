@@ -1,11 +1,10 @@
 <template>
   <transition name="modal-fade">
-    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-white/70 backdrop-blur-md p-4">
       <Card
         class="relative w-full max-w-3xl bg-white/95 backdrop-blur-sm border-0 shadow-2xl overflow-hidden max-h-[95vh] transition-all duration-500 transform"
-        :class="{ 'scale-100 opacity-100': true }">
+        >
 
-        <!-- Header with Gradient -->
         <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 p-8 text-white rounded-xl">
           <h2 class="text-3xl font-bold text-center mb-2">
             Inscrire Votre Établissement
@@ -191,8 +190,7 @@
                     class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-0 transition-colors duration-200 bg-gray-50/50" />
                 </div>
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Numéro de téléphone (WhatsApp si
-                    possible)</label>
+                  <label class="block text-sm font-semibold text-gray-700">Numéro de téléphone (WhatsApp)</label>
                   <input type="tel" v-model="formData.whatsappNumber" placeholder="+261 xx xxx xx xx"
                     class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-0 transition-colors duration-200 bg-gray-50/50" />
                 </div>
