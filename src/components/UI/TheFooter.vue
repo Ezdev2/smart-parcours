@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
       <div class="mb-4 md:mb-0">
         <router-link to="/" class="flex items-center justify-center md:justify-start">
-          <Logo class="w-1/2" />
+          <Logo />
         </router-link>
         <p class="text-sm mt-2 opacity-80 max-w-sm">
           Votre partenaire pour une orientation scolaire réussie et une gestion académique optimisée.

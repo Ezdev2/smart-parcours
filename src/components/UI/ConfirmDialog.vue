@@ -31,8 +31,8 @@
 </template>
 
 <script setup>
-import Button from './Button.vue'; // Assurez-vous que le chemin est correct
-import { useConfirm } from '../../composables/useConfirm'; // Assurez-vous que le chemin est correct
+import Button from './Button.vue'; 
+import { useConfirm } from '../../composables/useConfirm';
 
 const { confirmState, confirmAction, cancelAction } = useConfirm();
 </script>

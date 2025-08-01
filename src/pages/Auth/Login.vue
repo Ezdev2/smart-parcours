@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen md:bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md flex flex-col items-center">
-      <Logo type="sigle" class="w-1/2" />
+      <Logo type="sigle" />
       <p class="hidden md:block mt-2 text-center text-sm text-gray-600">
         Connexion à votre compte
       </p>

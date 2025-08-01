@@ -4,7 +4,7 @@
   >
     <!-- Logo -->
     <div class="px-8 pb-8 border-b border-black/10 mb-8">
-      <Logo class="w-full" />
+      <Logo />
     </div>
 
     <!-- Navigation -->
