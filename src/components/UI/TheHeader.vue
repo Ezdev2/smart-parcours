@@ -3,12 +3,12 @@
     <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center">
         <router-link to="/" class="flex items-center">
-          <Logo class="w-1/2" />
+          <Logo />
         </router-link>
       </div>
 
       <div class="hidden md:flex items-center space-x-6">
-        <a href="#why-smart-parcours" class="nav-link" @click.prevent="scrollToSection('why-smart-parcours')">Pourquoi Smart Parcours ?</a>
+        <a href="#why-smart-parcours" class="nav-link" @click.prevent="scrollToSection('why-smart-parcours')">Pourquoi SmartParcours ?</a>
         <a href="#services" class="nav-link" @click.prevent="scrollToSection('services')">Nos Services</a>
         <a href="#pricing" class="nav-link" @click.prevent="scrollToSection('pricing')">Tarifs</a>
         <router-link to="/login">
@@ -31,7 +31,7 @@
           </button>
         </div>
         <nav class="flex flex-col items-center space-y-6 text-lg">
-          <a href="#why-smart-parcours" class="nav-link" @click="closeMenuAndScroll('why-smart-parcours')">Pourquoi Smart Parcours ?</a>
+          <a href="#why-smart-parcours" class="nav-link" @click="closeMenuAndScroll('why-smart-parcours')">Pourquoi SmartParcours ?</a>
           <a href="#services" class="nav-link" @click="closeMenuAndScroll('services')">Nos Services</a>
           <a href="#pricing" class="nav-link" @click="closeMenuAndScroll('pricing')">Tarifs</a>
           <router-link to="/login" @click="mobileMenuOpen = false">

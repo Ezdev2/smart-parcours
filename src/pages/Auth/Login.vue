@@ -1,14 +1,14 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
-      <Logo class="w-full" />
-      <p class="mt-2 text-center text-sm text-gray-600">
+  <div class="min-h-screen md:bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md flex flex-col items-center">
+      <Logo type="sigle" class="w-1/2" />
+      <p class="hidden md:block mt-2 text-center text-sm text-gray-600">
         Connexion à votre compte
       </p>
     </div>
 
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-      <Card>
+    <div class="md:mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="bg-white rounded-2xl p-6 p-6 md:border border-gray-100">
         <h2 class="text-center text-3xl font-bold text-gray-900">
           Connexion
         </h2>
@@ -76,7 +76,7 @@
             </div>
           </div> -->
         </form>
-      </Card>
+      </div>
     </div>
   </div>
 </template>

@@ -23,11 +23,7 @@ onMounted(() => {
 html {
   scroll-behavior: smooth;
 }
-body {
-  font-family: 'Inter', 'League Spartan', sans-serif;
-  text-align: start;
+body, h1 {
+  font-family: 'Montserrat', 'Inter', 'League Spartan', sans-serif;
 }
-/* .container {
-  max-width: 1200px;
-} */
 </style>

@@ -101,7 +101,7 @@ Les étudiants peuvent consulter l'historique détaillé de leurs bulletins scol
 
 ### 7. Recommandations d'Orientation (pour les étudiants)
 
-C'est la fonctionnalité centrale de l'application "Smart Parcours", offrant des conseils personnalisés basés sur l'intelligence artificielle.
+C'est la fonctionnalité centrale de l'application "SmartParcours", offrant des conseils personnalisés basés sur l'intelligence artificielle.
 
 * **Accès à la Dernière Recommandation :** L'étudiant voit d'emblée sa recommandation la plus récente.
 * **Historique des Recommandations :** Accès à un historique cliquable de toutes les recommandations générées, permettant de revoir les analyses précédentes.

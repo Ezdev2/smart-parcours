@@ -1,8 +1,8 @@
 <template>
-  <section class="py-20 bg-gray-100" id="pricing">
+  <section class="py-20 md:py-40 bg-white" id="pricing">
     <div class="container mx-auto px-4 text-center">
       <h2 class="text-4xl font-bold text-gray-900 mb-6 animate-fade-in-on-scroll">
-        Nos Offres : Un Accès Inclusif à l'Innovation.
+        Nos Offres : Un accès inclusif à l'innovation.
       </h2>
       <p class="text-lg text-gray-700 mb-12 max-w-3xl mx-auto animate-fade-in-on-scroll delay-200">
         Nous sommes actuellement en phase <span class="font-semibold text-indigo-600">BÊTA</span>.
@@ -11,23 +11,22 @@
       </p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        <Card class="p-8 animate-fade-in-on-scroll delay-100">
-          <h3 class="text-2xl font-bold text-indigo-600 mb-4">Offre BÊTA (Gratuit)</h3>
-          <p class="text-gray-600 mb-6">Accès complet à toutes les fonctionnalités pendant la phase de test.</p>
-          <div class="text-5xl font-extrabold text-gray-900 mb-6">
+        <div class="w-full max-w-sm bg-indigo-600 text-white p-8 rounded-2xl shadow-xl transform md:scale-110 animate-on-scroll delay-300">
+          <h3 class="text-sm font-bold uppercase text-indigo-200 mb-2">Offre BÊTA</h3>
+          <p class="text-indigo-100 text-sm mb-6 h-12">Accès complet et gratuit à toutes les fonctionnalités pendant la phase de test.</p>
+          <div class="text-5xl font-extrabold text-white mb-6">
             0€<span class="text-xl font-normal">/mois</span>
           </div>
-          <ul class="text-left text-gray-700 space-y-3 mb-8">
-            <li class="flex items-center"><CheckCircleIcon class="h-5 w-5 text-green-500 mr-2" /> Accès complet à l'IA d'orientation</li>
-            <li class="flex items-center"><CheckCircleIcon class="h-5 w-5 text-green-500 mr-2" /> Gestion illimitée des élèves et bulletins</li>
-            <li class="flex items-center"><CheckCircleIcon class="h-5 w-5 text-green-500 mr-2" /> Tableau de bord administrateur détaillé</li>
-            <li class="flex items-center"><CheckCircleIcon class="h-5 w-5 text-green-500 mr-2" /> Accès enseignant et profil élève</li>
-            <li class="flex items-center"><CheckCircleIcon class="h-5 w-5 text-green-500 mr-2" /> Support prioritaire</li>
+          <ul class="text-left text-indigo-50 space-y-4 mb-8">
+            <li class="flex items-center"><svg class="h-5 w-5 text-green-400 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Accès complet à l'IA d'orientation</li>
+            <li class="flex items-center"><svg class="h-5 w-5 text-green-400 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Gestion illimitée des élèves</li>
+            <li class="flex items-center"><svg class="h-5 w-5 text-green-400 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Tableau de bord administrateur</li>
+            <li class="flex items-center"><svg class="h-5 w-5 text-green-400 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Support prioritaire</li>
           </ul>
-          <Button @click="$emit('add-school')" variant="primary" size="lg" class="w-full">
+          <button @click="$emit('add-school')"  class="w-full py-3 px-6 bg-white text-indigo-600 font-semibold rounded-lg shadow-md hover:bg-gray-100 transition-colors">
             Démarrer gratuitement
-          </Button>
-        </Card>
+          </button>
+        </div>
 
         <Card class="p-8 border-2 border-dashed border-gray-300 animate-fade-in-on-scroll delay-200">
           <h3 class="text-2xl font-bold text-gray-700 mb-4">Offre Premium (À Venir)</h3>

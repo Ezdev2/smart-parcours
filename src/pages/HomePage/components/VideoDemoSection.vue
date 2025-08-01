@@ -1,9 +1,9 @@
 <template>
-    <section class="md:py-20 bg-white">
-        <div class="container gap-4 flex flex-col md:grid grid-cols-3 mx-auto px-4 text-center">
+    <section class="md:py-20 py-12 bg-white">
+        <div class="container gap-4 flex flex-col lg:grid grid-cols-3 lg:gap-12 mx-auto px-4 text-center">
             <div class="col-span-1  animate-fade-in-on-scroll delay-200 flex flex-col gap-6 " >
-                <h2 class="text-4xl font-bold text-gray-900 text-start">
-                    Découvrez Smart Parcours en Action
+                <h2 class="text-3xl md:text-6xl font-extrabold text-indigo-900 text-start">
+                    Découvrez SmartParcours en action
                 </h2>
                 <p class="text-lg text-gray-700 text-start">
                     Voyez comment notre plateforme transforme la gestion scolaire et l'orientation des élèves grâce à

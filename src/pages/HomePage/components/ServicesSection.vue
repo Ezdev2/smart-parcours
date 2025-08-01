@@ -1,50 +1,94 @@
 <template>
-  <section class="py-20 md:mt-20 bg-white flex items-center">
+  <section class="py-20 bg-indigo-900 animate-fade-in-on-scroll">
     <div class="container mx-auto px-4">
-      <h2 class="text-4xl font-bold text-gray-900 text-center mb-12 animate-fade-in-on-scroll">
-        Ce que Smart Parcours offre à votre établissement.
+      <h2 class="text-3xl lg:text-8xl font-bold text-white text-center mb-20">
+        Ce que SmartParcours offre à votre établissement.
       </h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <Card class="p-6 text-center animate-fade-in-on-scroll delay-100">
-          <SparklesIcon class="h-12 w-12 text-indigo-600 mx-auto mb-4" />
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">Orientation Personnalisée par IA</h3>
-          <p class="text-gray-700">Des recommandations sur mesure pour chaque élève, basées sur une analyse profonde de leur parcours académique et de leurs intérêts, propulsée par l'intelligence artificielle.</p>
-        </Card>
-        <Card class="p-6 text-center animate-fade-in-on-scroll delay-200">
-          <DocumentTextIcon class="h-12 w-12 text-green-600 mx-auto mb-4" />
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">Gestion Complète des Bulletins</h3>
-          <p class="text-gray-700">Centralisez, gérez et éditez facilement les bulletins de notes. Accès historique complet pour les élèves et les administrateurs, avec génération PDF instantanée.</p>
-        </Card>
-        <Card class="p-6 text-center animate-fade-in-on-scroll delay-300">
-          <UsersIcon class="h-12 w-12 text-blue-600 mx-auto mb-4" />
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">Suivi des Élèves Intuitif</h3>
-          <p class="text-gray-700">Des tableaux de bord clairs pour les administrateurs et enseignants, offrant une vue d'ensemble des performances, des moyennes et des activités récentes de chaque élève.</p>
-        </Card>
-        <Card class="p-6 text-center animate-fade-in-on-scroll delay-400">
-          <BriefcaseIcon class="h-12 w-12 text-purple-600 mx-auto mb-4" />
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">Optimisation des Carrières</h3>
-          <p class="text-gray-700">Aidez les élèves à visualiser leur futur professionnel avec des suggestions de métiers potentiels et des analyses de compatibilité pour les domaines et filières.</p>
-        </Card>
-        <Card class="p-6 text-center animate-fade-in-on-scroll delay-500">
-          <CogIcon class="h-12 w-12 text-orange-600 mx-auto mb-4" />
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">Paramètres Personnalisables</h3>
-          <p class="text-gray-700">Configurez facilement le nom de votre établissement, les classes, les matières, et gérez les accès des enseignants selon les besoins de votre école.</p>
-        </Card>
-        <Card class="p-6 text-center animate-fade-in-on-scroll delay-600">
-          <ShieldCheckIcon class="h-12 w-12 text-teal-600 mx-auto mb-4" />
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">Sécurité et Confidentialité</h3>
-          <p class="text-gray-700">Vos données et celles de vos élèves sont protégées par les meilleures pratiques de sécurité de Firebase et des contrôles d'accès rigoureux.</p>
-        </Card>
+
+      <div class="relative">
+        <div
+          ref="slider"
+          class="flex flex-col gap-4 lg:gap-0 lg:flex-row overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar lg:ml-20 lg:gap-x-8"
+        >
+          <div
+            v-for="(card, index) in cards"
+            :key="index"
+            class="lg:flex-shrink-0 w-full lg:w-[calc(33.333%_-_22px)] snap-start lg:mr-0"
+          >
+            <div
+              class="bg-gray-50 hover:bg-white transition-all duration-300 rounded-3xl p-12 h-full flex flex-col justify-between lg:items-end items-center gap-4 shadow-lg"
+            >
+              <component :is="card.icon" :class="[card.color, 'h-10', 'w-10', 'lg:hidden']"/>
+              <div>
+                <h3 class="text-3xl lg:text-4xl text-center lg:text-start font-bold text-gray-900 mb-3">
+                  {{ card.title }}
+                </h3>
+                <p class="text-gray-600 text-center lg:text-start">{{ card.description }}</p>
+              </div>
+              <div class="mt-2 p-6 bg-blue-100 w-[fit-content] rounded-full hidden lg:block">
+                <component :is="card.icon" :class="[card.color, 'h-10', 'w-10']"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div
+          class="hidden lg:block absolute top-1/2 -translate-y-1/2 w-full"
+        >
+          <div class="container mx-auto flex justify-between items-center px-0">
+            <button
+              @click="scrollLeft"
+              :disabled="isAtStart"
+              class="bg-white/70 hover:bg-white text-indigo-700 rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition-opacity disabled:opacity-0 disabled:cursor-not-allowed"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M11 17l-5-5m0 0l5-5m-5 5h12"
+                />
+              </svg>
+            </button>
+            <button
+              @click="scrollRight"
+              :disabled="isAtEnd"
+              class="bg-white/70 hover:bg-white text-indigo-700 rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition-opacity disabled:opacity-0 disabled:cursor-not-allowed"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 </template>
 
 <script setup>
-import Card from '@/components/UI/Card.vue'; // Adjust path
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import Card from '../../../components/UI/Card.vue';
 import { SparklesIcon, DocumentTextIcon, UsersIcon, BriefcaseIcon, CogIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline'; // Adjust path and import relevant icons
-// Intersection Observer setup (as in VideoDemoSection)
-import { onMounted } from 'vue';
+
 onMounted(() => {
   const elements = document.querySelectorAll('.animate-fade-in-on-scroll');
   const observer = new IntersectionObserver(entries => {
@@ -56,10 +100,86 @@ onMounted(() => {
   }, { threshold: 0.1 });
   elements.forEach(el => observer.observe(el));
 });
+
+const slider = ref(null)
+const isAtStart = ref(true)
+const isAtEnd = ref(false)
+
+const updateButtonState = () => {
+  if (!slider.value) return
+  const el = slider.value
+  const tolerance = 1
+  isAtStart.value = el.scrollLeft <= tolerance
+  isAtEnd.value =
+    el.scrollLeft >= el.scrollWidth - el.clientWidth - tolerance
+}
+
+const scrollRight = () => {
+  slider.value?.scrollBy({ left: slider.value.clientWidth, behavior: 'smooth' })
+}
+
+const scrollLeft = () => {
+  slider.value?.scrollBy({ left: -slider.value.clientWidth, behavior: 'smooth' })
+}
+
+onMounted(() => {
+  updateButtonState()
+  slider.value?.addEventListener('scroll', updateButtonState)
+  window.addEventListener('resize', updateButtonState)
+})
+
+onBeforeUnmount(() => {
+  slider.value?.removeEventListener('scroll', updateButtonState)
+  window.removeEventListener('resize', updateButtonState)
+})
+
+const cards = [
+  {
+    title: 'Orientation IA personnalisée ',
+    description:
+      'Des recommandations sur mesure pour chaque élève, basées sur une analyse profonde de leur parcours académique et de leurs intérêts.',
+      icon: SparklesIcon,
+      color: "text-indigo-600"
+  },
+  {
+    title: 'Gestion complète des bulletins',
+    description:
+      'Centralisez, gérez et éditez facilement les bulletins de notes. Accès historique complet et génération PDF instantanée.',
+    icon: DocumentTextIcon,
+    color: "text-green-600"
+  },
+  {
+    title: 'Suivi des élèves intuitif',
+    description:
+      'Des tableaux de bord clairs offrant une vue d\'ensemble des performances, des moyennes et des activités récentes de chaque élève.',
+    icon: UsersIcon,
+    color: "text-blue-600"
+  },
+  {
+    title: 'Optimisation des carrières',
+    description:
+      'Aidez les élèves à visualiser leur futur professionnel avec des suggestions de métiers et des analyses de compatibilité.',
+    icon: BriefcaseIcon,
+    color: "text-indigo-600"
+  },
+  {
+    title: 'Paramètres personnalisables',
+    description:
+      'Configurez facilement le nom de votre établissement, les classes, les matières, et gérez les accès des enseignants.',
+    icon: CogIcon,
+    color: "text-red-600"
+  },
+  {
+    title: 'Sécurité et Confidentialité',
+    description:
+      'Vos données et celles de vos élèves sont protégées par les meilleures pratiques de sécurité et des contrôles d\'accès rigoureux.',
+    icon: ShieldCheckIcon,
+    color: "text-teal-600"
+  },
+]
 </script>
 
 <style scoped>
-/* Same animation styles as VideoDemoSection */
 .animate-fade-in-on-scroll {
   opacity: 0;
   transform: translateY(20px);
@@ -75,4 +195,12 @@ onMounted(() => {
 .delay-400 { transition-delay: 0.4s; }
 .delay-500 { transition-delay: 0.5s; }
 .delay-600 { transition-delay: 0.6s; }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 </style>
