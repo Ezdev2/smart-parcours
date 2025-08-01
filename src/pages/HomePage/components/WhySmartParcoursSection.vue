@@ -36,7 +36,7 @@
                     SmartParcours valorise un dossier scolaire complet et prépare les élèves aux défis futurs, en
                     intégrant développement personnel et vie sociale.
                 </p>
-                <button
+                <button @click="$emit('add-school')"
                     class="flex md:gap-4 items-center rounded-full md:w-[fit-content] justify-center text-indigo-600 bg-white px-12 md:py-5 py-3 hover:shadow-xl transform hover:-translate-y-1 transition duration-300 font-semibold">
                     <SparklesIcon class="h-6 w-6 text-indigo-600" />
                     <span>Je m'embarque maintenant</span>
