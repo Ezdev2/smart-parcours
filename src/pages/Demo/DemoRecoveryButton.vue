@@ -42,7 +42,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useAppStore } from '@/stores/app';
+import { useAppStore } from '../../stores/app';
 import { useRoute } from 'vue-router';
 
 const appStore = useAppStore();

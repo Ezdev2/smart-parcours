@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="flex justify-between items-center">
       <h1 class="text-2xl font-bold text-gray-900">Recommandations d'Orientation</h1>
-      <Button @click="generateNewRecommendation" :disabled="loading || !canGenerateRecommendation" class="flex items-center">
+      <Button @click="startQuestionnaire" :disabled="loading || !canGenerateRecommendation" class="flex items-center">
         <SparklesIcon class="h-5 w-5 mr-2" />
         {{ loading ? 'Génération...' : 'Nouvelle analyse IA' }}
         <span 
@@ -23,7 +23,6 @@
       <p v-if="!canGenerateRecommendation" class="text-red-500 text-xs mt-1">Vous avez atteint la limite de générations pour cette semaine.</p>
     </div>
 
-
     <LoadingSpinner v-if="loading" text="Génération de vos recommandations, cela peut prendre quelques instants..." color="indigo" class="my-8" />
 
     <div v-else-if="generationError" class="bg-red-50 border border-red-200 rounded-md p-4">
@@ -33,7 +32,7 @@
     <Card v-else-if="!latestRecommendation">
       <EmptyState :icon="SparklesIcon" title="Aucune recommandation disponible"
         description="Générez votre première analyse d'orientation personnalisée avec l'IA."
-        buttonText="Générer mes recommandations" @action="generateNewRecommendation" />
+        buttonText="Générer mes recommandations" @action="startQuestionnaire" />
     </Card>
 
     <div v-else>
@@ -68,6 +67,13 @@
       </Card>
     </div>
 
+    <!-- Questionnaire Modal -->
+    <QuestionnaireModal 
+      :isOpen="showQuestionnaire" 
+      @close="cancelQuestionnaire"
+      @complete="handleQuestionnaireComplete"
+    />
+
     <ConfirmDialog />
   </div>
 </template>
@@ -82,11 +88,12 @@ import Button from '../../components/UI/Button.vue'
 import EmptyState from '../../components/UI/EmptyState.vue'
 import LoadingSpinner from '../../components/UI/LoadingSpinner.vue';
 import ConfirmDialog from '../../components/UI/ConfirmDialog.vue';
+import QuestionnaireModal from './Recommendations/QuestionnaireModal.vue';
 import RecommendationsDisplay from './Recommendations/RecommendationsDisplay.vue'
 import { useConfirm } from '../../composables/useConfirm';
 
 // Icons
-import { SparklesIcon, AcademicCapIcon, BookOpenIcon, PaintBrushIcon, CogIcon, BriefcaseIcon, TrophyIcon, LanguageIcon, CommandLineIcon, CalculatorIcon, LightBulbIcon } from '@heroicons/vue/24/outline'; // Importing more icons for academic profiles
+import { SparklesIcon } from '@heroicons/vue/24/outline';
 
 const authStore = useAuthStore()
 const user = computed(() => authStore.user)
@@ -97,6 +104,7 @@ const loading = ref(false)
 const generationError = ref(null);
 const selectedIndex = ref(0);
 const weeklyGenerationCount = ref(0);
+const showQuestionnaire = ref(false);
 
 const LATEST_RECOMMENDATION_LIMIT = OrientationService.MAX_WEEKLY_RECOMMENDATIONS;
 
@@ -140,14 +148,33 @@ const loadRecommendationsAndCount = async () => {
   }
 };
 
-// --- Recommendation Generation ---
-const generateNewRecommendation = async () => {
+// --- Questionnaire Management ---
+const startQuestionnaire = () => {
   if (!user.value || !user.value.id) {
     showAlert('Erreur', 'Utilisateur non connecté.', 'Ok');
     return;
   }
   if (!canGenerateRecommendation.value) {
     showAlert('Limite de génération', `Vous avez atteint la limite de ${LATEST_RECOMMENDATION_LIMIT} recommandations par semaine. Veuillez réessayer la semaine prochaine.`, 'Ok');
+    return;
+  }
+
+  showQuestionnaire.value = true;
+};
+
+const cancelQuestionnaire = () => {
+  showQuestionnaire.value = false;
+};
+
+const handleQuestionnaireComplete = async (questionnaireResponses) => {
+  showQuestionnaire.value = false;
+  await generateNewRecommendation(questionnaireResponses);
+};
+
+// --- Recommendation Generation ---
+const generateNewRecommendation = async (questionnaireResponses = null) => {
+  if (!user.value || !user.value.id) {
+    showAlert('Erreur', 'Utilisateur non connecté.', 'Ok');
     return;
   }
 
@@ -161,26 +188,33 @@ const generateNewRecommendation = async () => {
     }
 
     // Récupérer les informations de la classe actuelle de l'étudiant
-  if (studentProfile.profile?.class) {
-    const currentClassInfo = await FirebaseService.getClassById(studentProfile.profile.class);
-    if (currentClassInfo) {
-      studentProfile.profile.classDisplayName = currentClassInfo.name;
+    if (studentProfile.profile?.class) {
+      const currentClassInfo = await FirebaseService.getClassById(studentProfile.profile.class);
+      if (currentClassInfo) {
+        studentProfile.profile.classDisplayName = currentClassInfo.name;
+      }
     }
-  }
 
     const bulletins = await FirebaseService.getBulletinsByStudent(user.value.id);
     // Fetch classes data to include class names in bulletin prompt
     const allClasses = await FirebaseService.getAllClasses();
     bulletins.forEach(bulletin => {
-        const classInfo = allClasses.find(c => c.id === bulletin.classId);
-        bulletin.classDisplayName = classInfo ? classInfo.name : 'Classe inconnue';
+      const classInfo = allClasses.find(c => c.id === bulletin.classId);
+      bulletin.classDisplayName = classInfo ? classInfo.name : 'Classe inconnue';
     });
 
     const age = studentProfile.profile?.dateOfBirth
       ? (new Date().getFullYear() - new Date(studentProfile.profile.dateOfBirth).getFullYear())
       : null;
 
-    const prompt = OrientationService.buildPromptFromProfile(user.value, bulletins, age);
+    // Build prompt with questionnaire responses
+    const prompt = OrientationService.buildPromptFromProfile(
+      user.value, 
+      bulletins, 
+      age, 
+      questionnaireResponses
+    );
+    
     const result = await OrientationService.generateRecommendations(prompt);
 
     await FirebaseService.createRecommendation({
@@ -190,7 +224,12 @@ const generateNewRecommendation = async () => {
 
     await loadRecommendationsAndCount();
     selectedIndex.value = 0;
-    showAlert('Succès', 'Nouvelles recommandations IA générées avec succès !', 'Super');
+    
+    const message = questionnaireResponses 
+      ? 'Nouvelles recommandations IA générées avec succès ! Vos réponses au questionnaire ont été prises en compte pour personnaliser les recommandations.'
+      : 'Nouvelles recommandations IA générées avec succès !';
+    
+    showAlert('Succès', message, 'Super');
 
   } catch (error) {
     console.error('Error generating recommendations:', error);

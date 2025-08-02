@@ -1,15 +1,14 @@
 <template>
   <div>
-    <!-- <TheHeader/> -->
     <HeroSection @add-school="openAddSchoolModal" />
     <ServicesSection id="services" />
     <DemoSection id="demo" @add-school="openAddSchoolModal" />
+    <DemoRecoveryButton />
     <VideoDemoSection id="video-demo" />
     <WhySmartParcoursSection id="why-smart-parcours" @add-school="openAddSchoolModal" />
     <HowItWorksSection id="how-it-works" />
     <PricingSection id="pricing" @add-school="openAddSchoolModal" /> 
     <AddSchoolFormModal v-if="showAddSchoolModal" @close="showAddSchoolModal = false" @submit-success="handleSchoolAdded" />
-    <!-- <TheFooter /> -->
   </div>
 </template>
 
@@ -17,13 +16,14 @@
 import { ref } from 'vue';
 
 import HeroSection from './components/HeroSection.vue';
+import DemoSection from './components/DemoSection.vue';
 import VideoDemoSection from './components/VideoDemoSection.vue';
 import ServicesSection from './components/ServicesSection.vue';
-import DemoSection from './components/DemoSection.vue';
 import WhySmartParcoursSection from './components/WhySmartParcoursSection.vue';
 import HowItWorksSection from './components/HowItWorksSection.vue';
 import PricingSection from './components/PricingSection.vue';
 import AddSchoolFormModal from './components/AddSchoolFormModal.vue';
+import DemoRecoveryButton from '../Demo/DemoRecoveryButton.vue';
 import { useConfirm } from '@/composables/useConfirm';
 
 const showAddSchoolModal = ref(false);

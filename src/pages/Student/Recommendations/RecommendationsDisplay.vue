@@ -12,10 +12,10 @@
           <p class="text-gray-700 leading-relaxed">{{ recommendation.content }}</p>
           <div class="mt-4 text-sm text-gray-500">
             Générée le {{ formatDate(recommendation.generatedAt) }}
-            <span v-if="recommendation.status === 'reviewed'" class="ml-2 text-green-600 font-medium">
+            <!-- <span v-if="recommendation.status === 'reviewed'" class="ml-2 text-green-600 font-medium">
               (Révisée par l'administration le {{ formatDate(recommendation.reviewedAt) }})
             </span>
-            <span v-else class="ml-2 text-orange-600 font-medium"> (En attente de révision) </span>
+            <span v-else class="ml-2 text-orange-600 font-medium"> (En attente de révision) </span> -->
           </div>
         </div>
         <div v-if="recommendation.academicProfile?.title"

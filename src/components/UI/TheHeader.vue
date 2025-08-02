@@ -70,7 +70,6 @@ const scrollToSection = (id) => {
   if (el) {
     el.scrollIntoView({ behavior: 'smooth' });
   } else {
-    // If not on homepage, navigate to homepage first, then scroll
     router.push({ path: '/', hash: `#${id}` });
   }
 };

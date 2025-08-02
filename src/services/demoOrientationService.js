@@ -34,7 +34,7 @@ export class DemoOrientationService {
       },
       {
         id: 'literature_level',
-        question: 'Comment évaluez-vous votre niveau en littérature/français ?',
+        question: 'Comment évaluez-vous votre niveau en littérature ?',
         type: 'scale', 
         scale: { min: 1, max: 10, labels: ['Très faible', 'Excellent'] },
         badge: 'academic'
@@ -317,7 +317,7 @@ Start directly with { and end with }.
       "groupTitle": "Filières Recommandées",
       "suggestions": [
         {
-          "name": "Nom de la filière en français",
+          "name": "Nom de la filière en français (De genre, pas litteralement mais en ce format : Licence Informatique, Medecine Generale, Commerce Internationle, etc...)",
           "compatibility": 85,
           "rationale": "Justification détaillée en français"
         }
@@ -446,7 +446,7 @@ Start directly with { and end with }.
    */
   static getMockDemoRecommendations(userData) {
     return {
-      title: "Analyse de Profil - Démonstration SmartParcours",
+      title: "Analyse de Profil - Démonstration SmartParcours - Mock Data",
       content: `Analyse personnalisée basée sur le questionnaire de ${userData.firstName} ${userData.lastName}. Cette démonstration montre les capacités d'analyse de SmartParcours.`,
       type: "demo_orientation",
       academicProfile: {
