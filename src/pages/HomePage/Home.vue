@@ -3,6 +3,7 @@
     <!-- <TheHeader/> -->
     <HeroSection @add-school="openAddSchoolModal" />
     <ServicesSection id="services" />
+    <DemoSection id="demo" @add-school="openAddSchoolModal" />
     <VideoDemoSection id="video-demo" />
     <WhySmartParcoursSection id="why-smart-parcours" @add-school="openAddSchoolModal" />
     <HowItWorksSection id="how-it-works" />
@@ -18,6 +19,7 @@ import { ref } from 'vue';
 import HeroSection from './components/HeroSection.vue';
 import VideoDemoSection from './components/VideoDemoSection.vue';
 import ServicesSection from './components/ServicesSection.vue';
+import DemoSection from './components/DemoSection.vue';
 import WhySmartParcoursSection from './components/WhySmartParcoursSection.vue';
 import HowItWorksSection from './components/HowItWorksSection.vue';
 import PricingSection from './components/PricingSection.vue';

@@ -23,12 +23,19 @@ import TeacherStudents from '../pages/Teacher/TeacherStudents.vue'
 import AppLayout from '../components/Layout/AppLayout.vue'
 import Home from '../pages/HomePage/Home.vue'
 import TermsAndConditions from '../pages/TermsAndConditions.vue'
+import DemoPage from '../pages/DemoPage.vue'
 
 const routes = [
   {
-    path: '//terms-conditions',
+    path: '/terms-conditions',
     name: 'condition',
     component: TermsAndConditions,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/demo',
+    name: 'demo',
+    component: DemoPage,
     meta: { requiresAuth: false }
   },
   {

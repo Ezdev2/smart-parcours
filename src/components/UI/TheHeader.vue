@@ -11,6 +11,7 @@
         <a href="#why-smart-parcours" class="nav-link" @click.prevent="scrollToSection('why-smart-parcours')">Pourquoi SmartParcours ?</a>
         <a href="#services" class="nav-link" @click.prevent="scrollToSection('services')">Nos Services</a>
         <a href="#pricing" class="nav-link" @click.prevent="scrollToSection('pricing')">Tarifs</a>
+        <a href="#demo" class="nav-link" @click.prevent="scrollToSection('demo')">Demo</a>
         <router-link to="/login">
           <Button variant="primary" size="sm">Connexion</Button>
         </router-link>
@@ -34,6 +35,7 @@
           <a href="#why-smart-parcours" class="nav-link" @click="closeMenuAndScroll('why-smart-parcours')">Pourquoi SmartParcours ?</a>
           <a href="#services" class="nav-link" @click="closeMenuAndScroll('services')">Nos Services</a>
           <a href="#pricing" class="nav-link" @click="closeMenuAndScroll('pricing')">Tarifs</a>
+          <a href="#demo" class="nav-link" @click="closeMenuAndScroll('demo')">Demo</a>
           <router-link to="/login" @click="mobileMenuOpen = false">
             <Button variant="primary" size="lg">Connexion</Button>
           </router-link>
