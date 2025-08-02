@@ -23,7 +23,7 @@ import TeacherStudents from '../pages/Teacher/TeacherStudents.vue'
 import AppLayout from '../components/Layout/AppLayout.vue'
 import Home from '../pages/HomePage/Home.vue'
 import TermsAndConditions from '../pages/TermsAndConditions.vue'
-import DemoPage from '../pages/DemoPage.vue'
+import DemoPage from '../pages/Demo/DemoPage.vue'
 
 const routes = [
   {
