@@ -95,6 +95,23 @@
                     </div>
                     <span class="ml-2 text-sm font-semibold text-blue-700">{{ suggestion.compatibility }}%</span>
                   </div>
+                  <div v-if="group.groupType === 'filiere_recommandee' && suggestion.establishments && suggestion.establishments.length > 0">
+                    <button @click="toggleEstablishments(group.groupType, index)" 
+                            class="mt-3 flex items-center justify-between w-full text-left text-sm font-medium text-indigo-600 hover:text-indigo-800 p-2 bg-indigo-50 rounded-md">
+                      <span>Voir les {{ suggestion.establishments.length }} établissements recommandés</span>
+                      <ChevronDownIcon v-if="expandedSuggestionIndex !== index || currentGroupType !== group.groupType" class="h-5 w-5 transition-transform"/>
+                      <ChevronUpIcon v-else class="h-5 w-5 transition-transform"/>
+                    </button>
+
+                    <div v-if="expandedSuggestionIndex === index && currentGroupType === group.groupType" class="mt-2 pl-4 pr-2 py-2 border-l-2 border-indigo-200 bg-white">
+                      <h4 class="font-semibold text-gray-800 text-sm mb-2">Établissements proposant cette filière :</h4>
+                      <ul class="space-y-2 max-h-60 overflow-y-auto">
+                        <li v-for="(establishment, estIndex) in suggestion.establishments" :key="estIndex" class="text-xs text-gray-700">
+                          - {{ establishment }}
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
                 </li>
               </template>
               <li v-else class="text-center text-gray-500 py-4">Aucune suggestion pour ce groupe.</li>
@@ -131,6 +148,8 @@ import {
   SparklesIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
+  ChevronDownIcon, 
+  ChevronUpIcon,
   AcademicCapIcon, // Scientific, Literary, Linguistic, Economic and Social, etc.
   CubeTransparentIcon, // Technical, Logical, Creative
   BriefcaseIcon, // Career, Economic and Social, Sports
@@ -174,7 +193,19 @@ const props = defineProps({
   }
 });
 
+const expandedSuggestionIndex = ref(null);
+const currentGroupType = ref('');
 const suggestedPathsViewMode = ref('list');
+
+const toggleEstablishments = (groupType, index) => {
+    if (expandedSuggestionIndex.value === index && currentGroupType.value === groupType) {
+        expandedSuggestionIndex.value = null;
+        currentGroupType.value = '';
+    } else {
+        expandedSuggestionIndex.value = index;
+        currentGroupType.value = groupType;
+    }
+};
 
 const getAcademicProfileIcon = (code) => {
   switch (code) {

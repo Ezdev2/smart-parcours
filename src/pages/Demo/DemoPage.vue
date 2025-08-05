@@ -61,7 +61,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                   Prénom *
                 </label>
-                <input v-model="userData.firstName" type="text" required
+                <input v-model="localUserData.firstName" type="text" required
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   placeholder="Votre prénom" />
               </div>
@@ -69,7 +69,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                   Nom *
                 </label>
-                <input v-model="userData.lastName" type="text" required
+                <input v-model="localUserData.lastName" type="text" required
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   placeholder="Votre nom" />
               </div>
@@ -80,7 +80,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                   Âge *
                 </label>
-                <input v-model.number="userData.age" type="number" min="14" max="25" required
+                <input v-model.number="localUserData.age" type="number" min="14" max="25" required
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   placeholder="Votre âge" />
               </div>
@@ -88,7 +88,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                   Niveau d'études *
                 </label>
-                <select v-model="userData.level" required
+                <select v-model="localUserData.level" required
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                   <option value="">Sélectionnez votre niveau</option>
                   <option value="3ème">3ème</option>
@@ -104,7 +104,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 Classe actuelle *
               </label>
-              <select v-model="userData.classLevel" required
+              <select v-model="localUserData.classLevel" required
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                 <option value="">Sélectionnez votre classe</option>
                 <option value="3ème Générale">3ème Générale</option>
@@ -346,12 +346,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useAppStore } from '../../stores/app';
 import { DemoOrientationService } from '../../services/demoOrientationService';
 
 const emit = defineEmits(['add-school']);
 const appStore = useAppStore();
+
+const localUserData = ref({ ...appStore.getDemoUserData });
 
 // État local réactif basé sur le store
 const totalSteps = 5;
@@ -415,7 +417,7 @@ const isLastQuestion = computed(() => {
 // Navigation
 const nextStep = () => {
   if (currentStep.value === 0) {
-    appStore.updateDemoUserData(userData.value);
+    appStore.updateDemoUserData(localUserData.value);
     appStore.updateDemoStep(1);
     appStore.updateDemoBadge('academic');
     appStore.updateDemoQuestionIndex(0);
@@ -543,16 +545,11 @@ const restartDemo = () => {
   showContinueNotification.value = false;
 };
 
-// Watchers pour la synchronisation automatique
-watch(userData, (newUserData) => {
-  if (currentStep.value === 0) {
-    appStore.updateDemoUserData(newUserData);
-  }
-}, { deep: true });
-
 onMounted(() => {
   // Initialiser les données de démo depuis localStorage
   appStore.initializeDemo();
+
+  localUserData.value = { ...appStore.getDemoUserData };
 
   // Vérifier s'il y a une démo en cours et proposer de continuer
   if (hasDemoInProgress.value && currentStep.value > 0) {

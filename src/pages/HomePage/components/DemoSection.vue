@@ -63,7 +63,7 @@
               </div>
 
               <div class="text-center">
-                <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-8 text-white mb-6">
+                <div class="bg-black rounded-xl p-8 text-white mb-6">
                   <div class="text-5xl font-bold mb-2">25+</div>
                   <div class="text-lg">Questions Personnalisées</div>
                 </div>

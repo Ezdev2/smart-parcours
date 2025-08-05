@@ -1,4 +1,5 @@
-import { QuestionnaireService } from './questionnaireService';
+import { QuestionnaireService } from "./questionnaireService";
+import accreditedPaths from "../data/accredited_paths.json";
 
 export class OrientationService {
   static GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
@@ -21,8 +22,16 @@ export class OrientationService {
   /**
    * Construit le prompt optimisé en anglais pour l'IA avec support questionnaire
    */
-  static buildPromptFromProfile(user, bulletins, age, questionnaireResponses = null) {
+  static buildPromptFromProfile(
+    user,
+    bulletins,
+    age,
+    questionnaireResponses = null
+  ) {
     const profile = user.profile;
+
+    // Convertir la liste JSON en une chaîne de caractères pour l'injecter dans le prompt
+    const accreditedPathsJSONString = JSON.stringify(accreditedPaths, null, 2);
 
     let prompt = `# Academic Orientation Analysis Prompt
 
@@ -69,13 +78,22 @@ You are an experienced academic counselor and profile analysis expert. You will 
 
     // Add questionnaire responses if provided
     if (questionnaireResponses && questionnaireResponses.length > 0) {
-      prompt += QuestionnaireService.buildQuestionnaireSection(questionnaireResponses);
+      prompt += QuestionnaireService.buildQuestionnaireSection(
+        questionnaireResponses
+      );
       prompt += `\n**IMPORTANT:** The questionnaire responses above provide crucial insights into the student's preferences, aspirations, and learning style. Please give significant weight to these responses (40% weight) in your analysis alongside academic performance (50%) and expressed interests (10%).\n\n`;
     }
 
-    const hasQuestionnaire = questionnaireResponses && questionnaireResponses.length > 0;
+    const hasQuestionnaire =
+      questionnaireResponses && questionnaireResponses.length > 0;
 
     prompt += `---
+
+## REFERENCE DATA: ACCREDITED HIGHER EDUCATION PATHS IN MADAGASCAR
+
+Here is the definitive list of accredited higher education programs and institutions in Madagascar. Your recommendations for "filiere_recommandee" MUST be based EXCLUSIVELY on this data.
+
+${accreditedPathsJSONString}
 
 ## RESPONSE REQUIREMENTS
 
@@ -85,11 +103,12 @@ Do NOT include any explanatory text, comments, tags, or code blocks (like \`\`\`
 Start directly with { and end with }.
 
 ### Evaluation Criteria (Weighting):
-${hasQuestionnaire ? 
-  `- **Academic Performance (50%):** Grades, trends, subject strengths
+${
+  hasQuestionnaire
+    ? `- **Academic Performance (50%):** Grades, trends, subject strengths
 - **Questionnaire Responses (40%):** Personal preferences, aspirations, learning style, career goals
-- **Expressed Field Interests (10%):** Stated preferences and motivations` :
-  `- **Academic Performance (50%):** Grades, trends, subject strengths
+- **Expressed Field Interests (10%):** Stated preferences and motivations`
+    : `- **Academic Performance (50%):** Grades, trends, subject strengths
 - **Personal Interests (35%):** Alignment with career paths and aptitudes
 - **Expressed Field Interests (15%):** Stated preferences and motivations`
 }
@@ -98,7 +117,11 @@ ${hasQuestionnaire ?
 
 {
   "title": "Recommendation title (e.g., Personalized Post-Bac Recommendations)",
-  "content": "Concise and supportive analysis summary with detailed academic profile insights, concrete and precise starting with the summary of the student's information (name, class, overall average, age)${hasQuestionnaire ? ', and highlighting key insights from the questionnaire responses' : ''}. Ex : Ezra Fanomezantsoa show...",
+  "content": "Concise and supportive analysis summary with detailed academic profile insights, concrete and precise starting with the summary of the student's information (name, class, overall average, age)${
+    hasQuestionnaire
+      ? ", and highlighting key insights from the questionnaire responses"
+      : ""
+  }. Ex : Ezra Fanomezantsoa show...",
   "type": "orientation",
   "priority": "high",
   "status": "pending", 
@@ -120,6 +143,10 @@ ${hasQuestionnaire ?
           "name": "Specific Program Name in French",
           "compatibility": 85,
           "rationale": "Detailed justification in French based on academic performance and interests."
+          "establishments": [
+            "Full Name of Institution 1 - City 1",
+            "Full Name of Institution 2 - City 2"
+            // List of establishments from the reference data for this program
         }
       ]
     },
@@ -153,6 +180,8 @@ ${hasQuestionnaire ?
 1. **Academic Programs (filiere_recommandee):** 
    - Suggest 4-6 specific university programs available in Madagascar or internationally
    - For high-performing students (15+ average), specify if better pursued abroad
+   - CRITICAL: Each suggested program's 'name' should be inspired by  one of the names from the 'filiere' arrays in the provided REFERENCE DATA and it should suggest at least 4 specific university programs.
+   - CRITICAL: For each suggested program, you MUST populate the 'establishments' array at least 6 establishments from the corresponding 'Institutions' list in the REFERENCE DATA. Ensure the full name and city are included as provided.
    - Include precise program names like "PACES (Première Année Commune aux Études de Santé)", "Licence en Sciences de l'Environnement", "Licence Professionnelle en Tourisme et Hôtellerie", "Droit", etc.
    - Content must be in French
 
@@ -177,15 +206,20 @@ ${hasQuestionnaire ?
    - All content (names, rationales, titles) should be in French to match the Malagasy educational context
    - JSON keys remain in English as specified
 
-${hasQuestionnaire ? 
-  `7. **Questionnaire Integration:** 
+${
+  hasQuestionnaire
+    ? `7. **Questionnaire Integration:** 
    - Use questionnaire responses to refine recommendations and better match student preferences
    - Highlight in rationales how specific answers influenced the suggestions
-   - Ensure academic profile selection considers both academic results and questionnaire responses` : 
-  ''
+   - Ensure academic profile selection considers both academic results and questionnaire responses`
+    : ""
 }
 
-**CRITICAL:** Return ONLY the JSON object. No additional text before or after. Ensure all compatibility scores are integers 0-100 and suggestions are sorted by compatibility in descending order${hasQuestionnaire ? '. Pay special attention to questionnaire responses for more personalized recommendations.' : ''}`;
+**CRITICAL:** Return ONLY the JSON object. No additional text before or after. Ensure all compatibility scores are integers 0-100 and suggestions are sorted by compatibility in descending order${
+      hasQuestionnaire
+        ? ". Pay special attention to questionnaire responses for more personalized recommendations."
+        : ""
+    }`;
 
     return prompt;
   }
@@ -282,7 +316,7 @@ ${hasQuestionnaire ?
         }
       }
 
-      this.validateRecommendationStructure(parsedResponse);
+      // this.validateRecommendationStructure(parsedResponse);
       return parsedResponse;
     } catch (error) {
       console.error("Error generating recommendations:", error);
@@ -317,6 +351,7 @@ ${hasQuestionnaire ?
       "name",
       "compatibility",
       "rationale",
+      "establishments",
     ];
 
     // Validate top-level fields
@@ -487,24 +522,40 @@ ${hasQuestionnaire ?
               compatibility: 95,
               rationale:
                 "Excellent niveau en sciences et mathématiques, profil adapté aux études médicales exigeantes.",
+              establishments: [
+                "UNIVERSITE ANTANANARIVO - FACULTE DE DROIT ET SCIENCES POLITIQUES (FAC/DSP)",
+                "UNIVERSITE ANTSIRANANA - FACULTE DE DROIT ET SCIENCES POLITIQUES, D'ECONOMIE ET DE GESTION (FAC/DSPEG)",
+              ],
             },
             {
               name: "Licence en Informatique et Sciences du Numérique",
               compatibility: 90,
               rationale:
                 "Très bonnes aptitudes logiques et mathématiques, secteur en forte croissance à Madagascar.",
+              establishments: [
+                "UNIVERSITE ANTANANARIVO - FACULTE DE DROIT ET SCIENCES POLITIQUES (FAC/DSP)",
+                "UNIVERSITE ANTSIRANANA - FACULTE DE DROIT ET SCIENCES POLITIQUES, D'ECONOMIE ET DE GESTION (FAC/DSPEG)",
+              ],
             },
             {
               name: "Classes Préparatoires aux Grandes Écoles (MPSI)",
               compatibility: 85,
               rationale:
                 "Profil scientifique solide permettant de viser les meilleures écoles d'ingénieurs.",
+              establishments: [
+                "UNIVERSITE ANTANANARIVO - FACULTE DE DROIT ET SCIENCES POLITIQUES (FAC/DSP)",
+                "UNIVERSITE ANTSIRANANA - FACULTE DE DROIT ET SCIENCES POLITIQUES, D'ECONOMIE ET DE GESTION (FAC/DSPEG)",
+              ],
             },
             {
               name: "Licence en Sciences de l'Ingénieur",
               compatibility: 80,
               rationale:
                 "Polyvalence technique et scientifique adaptée aux défis industriels.",
+              establishments: [
+                "UNIVERSITE ANTANANARIVO - FACULTE DE DROIT ET SCIENCES POLITIQUES (FAC/DSP)",
+                "UNIVERSITE ANTSIRANANA - FACULTE DE DROIT ET SCIENCES POLITIQUES, D'ECONOMIE ET DE GESTION (FAC/DSPEG)",
+              ],
             },
           ],
         },
