@@ -62,7 +62,7 @@
                 </div>
               </div>
 
-              <div class="text-center">
+              <div class="md:col-span-1 col-span-2 text-center">
                 <div class="bg-black rounded-xl p-8 text-white mb-6">
                   <div class="text-5xl font-bold mb-2">25+</div>
                   <div class="text-lg">Questions Personnalisées</div>

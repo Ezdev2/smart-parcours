@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white min-h-[60vh] flex flex-col justify-center items-center mt-8 md:mt-20">
 
-    <div class="md:w-[80%] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="md:w-[80%] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Progress Bar -->
       <div v-if="currentStep > 0" class="mb-8 w-full">
         <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
@@ -45,7 +45,7 @@
 
       <!-- Step 1: Informations personnelles -->
       <div class="w-full">
-        <div v-if="currentStep === 0" class="bg-white rounded-xl shadow-lg p-8">
+        <div v-if="currentStep === 0" class="bg-white rounded-xl shadow-lg md:p-8 p-4">
           <div class="text-center mb-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-4">
               Démonstration SmartParcours
@@ -130,7 +130,7 @@
         </div>
 
         <!-- Step 2-4: Questions -->
-        <div v-else-if="currentStep <= 3" class="bg-white rounded-xl shadow-lg p-8">
+        <div v-else-if="currentStep <= 3" class="bg-white rounded-xl shadow-lg md:p-8 p-4">
           <div class="mb-8">
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center space-x-3">
@@ -161,7 +161,7 @@
               <div class="flex items-center space-x-4">
                 <div class="flex-1 flex justify-between">
                   <div v-for="value in scaleRange" :key="value" @click="selectAnswer(value)"
-                    class="w-10 h-10 rounded-full border-2 cursor-pointer transition-all flex items-center justify-center text-sm font-medium"
+                    class="md:w-10 md:h-10 w-8 h-8 rounded-full border-2 cursor-pointer transition-all flex items-center justify-center text-sm font-medium"
                     :class="selectedAnswer === value
                       ? 'border-indigo-500 bg-indigo-500 text-white'
                       : 'border-gray-300 hover:border-indigo-300'">
