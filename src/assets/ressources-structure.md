@@ -60,6 +60,7 @@ COLLECTIONS PRINCIPALES :
          - name: string // Nom de la suggestion (ex: "Licence Informatique")
          - compatibility // pourcentage de compatibilité de suggestion
          - rationale: string // Justification de la suggestion
+         - establishments: array<string> // Liste des établissements
       
       - academicProfile: object // Profil académique de l'étudiant
        - title: string // Ex: "Scientifique", "Littéraire", "Artistique", etc.
@@ -202,9 +203,18 @@ const exampleRecommendation = {
       "groupType": "filiere_recommandee",
       "groupTitle": "Filières Recommandées",
       "suggestions": [
-        { "name": "Licence Informatique (Parcours Data Science)", "compatibility": 95, "rationale": "Excellents résultats en mathématiques, logique et intérêt prononcé pour l'analyse de données." },
-        { "name": "Cycle préparatoire aux Grandes Écoles (MP2I ou MPI)", "compatibility": 80, "rationale": "Solide base scientifique, ambition académique, ouvre la voie aux carrières d'ingénieur." },
-        { "name": "Licence Mathématiques-Physique", "compatibility": 70, "rationale": "Intérêt pour la théorie et la recherche." } // Added a 3rd for minimum count
+        { "name": "Licence Informatique (Parcours Data Science)", "compatibility": 95, "rationale": "Excellents résultats en mathématiques, logique et intérêt prononcé pour l'analyse de données.", "establishments": [
+                "UNIVERSITE ANTANANARIVO - FACULTE DE DROIT ET SCIENCES POLITIQUES (FAC/DSP)",
+                "UNIVERSITE ANTSIRANANA - FACULTE DE DROIT ET SCIENCES POLITIQUES, D'ECONOMIE ET DE GESTION (FAC/DSPEG)",
+              ], },
+        { "name": "Cycle préparatoire aux Grandes Écoles (MP2I ou MPI)", "compatibility": 80, "rationale": "Solide base scientifique, ambition académique, ouvre la voie aux carrières d'ingénieur.", "establishments": [
+                "UNIVERSITE ANTANANARIVO - FACULTE DE DROIT ET SCIENCES POLITIQUES (FAC/DSP)",
+                "UNIVERSITE ANTSIRANANA - FACULTE DE DROIT ET SCIENCES POLITIQUES, D'ECONOMIE ET DE GESTION (FAC/DSPEG)",
+              ], },
+        { "name": "Licence Mathématiques-Physique", "compatibility": 70, "rationale": "Intérêt pour la théorie et la recherche.", "establishments": [
+                "UNIVERSITE ANTANANARIVO - FACULTE DE DROIT ET SCIENCES POLITIQUES (FAC/DSP)",
+                "UNIVERSITE ANTSIRANANA - FACULTE DE DROIT ET SCIENCES POLITIQUES, D'ECONOMIE ET DE GESTION (FAC/DSPEG)",
+              ], }
       ]
     },
     {

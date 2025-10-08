@@ -6,7 +6,6 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
 import { FirebaseService } from "../services/firebaseService";
 
 export const useAuthStore = defineStore("auth", () => {

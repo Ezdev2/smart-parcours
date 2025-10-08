@@ -1,7 +1,7 @@
 # Cahier de Présentation des Fonctionnalités Actuelles
 Application **SmartParcours**
 
-**Date: 26 juillet 2025**
+**Date: 12 août 2025**
 
 ## Vue d'ensemble des fonctionnalités opérationnelles
 
@@ -16,7 +16,23 @@ Le cœur de l'application repose sur un système d'authentification robuste via 
 
 ---
 
-### 2. Gestion des paramètres de l'établissement (pour les administrateurs)
+### 2. **Page d'Accueil SaaS avec Démonstration Interactive** *(Nouveau)*
+
+Une page d'accueil moderne de style SaaS présente le service SmartParcours avec un espace démonstration intégré.
+
+* **Présentation du Service :** Interface moderne présentant les fonctionnalités de SmartParcours, ses avantages et sa valeur ajoutée pour les établissements scolaires.
+* **Démonstration Interactive Complète :**
+  * **Questionnaire de Démonstration :** Les visiteurs peuvent tester le service via un questionnaire interactif de 25+ questions réparties en 3 catégories (Académique, Aspiration, Logique).
+  * **Analyse IA en Temps Réel :** Le système utilise l'API Groq (Llama-3.3-70B-Versatile) pour générer des recommandations personnalisées basées sur les réponses du visiteur.
+  * **Résultats Authentiques :** La démo produit de véritables analyses d'orientation avec profil académique, points forts, axes d'amélioration et recommandations de filières.
+  * **Contenu Partiellement Restreint :** Les domaines suggérés et métiers potentiels sont floutés pour inciter à l'inscription complète, montrant la valeur ajoutée de la version complète.
+  * **Sauvegarde de Session :** Possibilité de reprendre le test interrompu grâce à la persistance localStorage.
+* **Call-to-Action Intégré :** Boutons d'inscription d'établissement directement accessible depuis les résultats de démonstration.
+* **Interface Responsive :** Optimisée pour tous les appareils avec une expérience utilisateur fluide.
+
+---
+
+### 3. Gestion des paramètres de l'établissement (pour les administrateurs)
 
 Les administrateurs disposent d'un module complet pour configurer les informations et les préférences de leur établissement.
 
@@ -25,12 +41,12 @@ Les administrateurs disposent d'un module complet pour configurer les informatio
 * **Personnalisation de l'interface :** Il est possible de choisir une couleur thématique principale et de télécharger l'URL d'un logo pour personnaliser l'apparence de l'application.
 * **Configuration des classes :** L'administrateur peut ajouter, supprimer et gérer la liste des classes de son établissement. Il peut sélectionner des classes existantes ou en créer de nouvelles directement depuis l'interface.
 * **Configuration des matières :** Similairement aux classes, l'administrateur peut définir les différentes matières enseignées, avec un nom, un code et un coefficient.
-* **Configuration des enseignants (Nouveau) :** Les administrateurs peuvent désormais visualiser, modifier, gérer et ajouter une liste d'enseignants associés à leur établissement. Cette gestion s'intègre aux paramètres généraux de l'établissement.
+* **Configuration des enseignants :** Les administrateurs peuvent désormais visualiser, modifier, gérer et ajouter une liste d'enseignants associés à leur établissement. Cette gestion s'intègre aux paramètres généraux de l'établissement.
 * **Sauvegarde des modifications :** Toutes les modifications apportées aux paramètres sont persistantes et sauvegardées dans Firestore, garantissant que la configuration de l'établissement est toujours à jour.
 
 ---
 
-### 3. Gestion des étudiants (pour les administrateurs)
+### 4. Gestion des étudiants (pour les administrateurs)
 
 Un module dédié permet aux administrateurs de gérer efficacement la base de données de leurs étudiants.
 
@@ -65,7 +81,7 @@ Un module dédié permet aux administrateurs de gérer efficacement la base de d
 
 ---
 
-### 4. Gestion des élèves (pour les enseignants) (Nouveau)
+### 5. Gestion des élèves (pour les enseignants)
 
 Les enseignants disposent d'un module dédié pour interagir avec les dossiers de leurs élèves.
 
@@ -77,7 +93,7 @@ Les enseignants disposent d'un module dédié pour interagir avec les dossiers d
 
 ---
 
-### 5. Profil étudiant (pour les étudiants)
+### 6. Profil étudiant (pour les étudiants)
 
 Les étudiants ont accès à leur propre profil pour consulter et mettre à jour leurs informations.
 
@@ -87,7 +103,7 @@ Les étudiants ont accès à leur propre profil pour consulter et mettre à jour
 
 ---
 
-### 6. Mes Bulletins (pour les étudiants)
+### 7. Mes Bulletins (pour les étudiants)
 
 Les étudiants peuvent consulter l'historique détaillé de leurs bulletins scolaires.
 
@@ -99,19 +115,28 @@ Les étudiants peuvent consulter l'historique détaillé de leurs bulletins scol
 
 ---
 
-### 7. Recommandations d'Orientation (pour les étudiants)
+### 8. **Recommandations d'Orientation Enrichies** *(Amélioré)*
 
-C'est la fonctionnalité centrale de l'application "SmartParcours", offrant des conseils personnalisés basés sur l'intelligence artificielle.
+C'est la fonctionnalité centrale de l'application "SmartParcours", offrant des conseils personnalisés basés sur l'intelligence artificielle avec un système de questionnaire approfondi.
 
 * **Accès à la Dernière Recommandation :** L'étudiant voit d'emblée sa recommandation la plus récente.
 * **Historique des Recommandations :** Accès à un historique cliquable de toutes les recommandations générées, permettant de revoir les analyses précédentes.
-* **Génération de Recommandations par IA :**
+* **Questionnaire d'Approfondissement :** *(Nouveau)*
+    * **30 Questions Ciblées :** Système de questionnaire complémentaire avec 30 questions réparties en 3 catégories :
+        - **Academic (5 questions) :** Préférences d'apprentissage, durée d'études, orientation recherche/pratique
+        - **Personal (10 questions) :** Motivations professionnelles, environnement de travail, équilibre vie-travail, entrepreneuriat, carrière internationale
+        - **Logic (10 questions) :** Résolution de problèmes, capacités d'analyse, prise de décision, concentration, types de mémoire
+    * **Interface Progressive :** Navigation fluide avec badges de progression, indicateurs de completion et possibilité de revenir en arrière.
+    * **Sauvegarde de Progression :** Le questionnaire peut être interrompu et repris plus tard.
+* **Génération de Recommandations par IA Affinée :**
     * **Processus de Demande :** En un clic, une requête est envoyée à une IA avancée (via l'API Groq).
-    * **Compilation des Données :** Le prompt envoyé à l'IA inclut des informations détaillées de l'étudiant :
+    * **Compilation des Données Enrichie :** Le prompt envoyé à l'IA inclut désormais :
         * Toutes les notes par matière et appréciations de **tous les bulletins disponibles (avec la classe de chaque bulletin)**.
         * Centres d'intérêt et filières d'intérêt exprimés.
         * Âge de l'étudiant.
         * Moyenne générale globale et niveau scolaire.
+        * **Réponses détaillées du questionnaire d'approfondissement** *(Nouveau)*
+    * **Analyse Plus Précise :** L'IA dispose d'informations plus complètes pour des recommandations personnalisées de haute qualité.
     * **Format de Réponse Strict :** L'IA est instruite de renvoyer une réponse au **format JSON structuré** et prédéfini de l'application, incluant :
         * **Titre et Contenu :** Résumé de l'analyse.
         * **Points Forts (`strengths`) :** Minimum 4 points.
@@ -123,15 +148,16 @@ C'est la fonctionnalité centrale de l'application "SmartParcours", offrant des 
             * Des nombres minimum de suggestions sont exigés par groupe (ex: 3+ filières, 2+ domaines, 6+ métiers).
             * Les filières suggérées sont précises et adaptées au contexte (Madagascar/international).
             * Les métiers suggérés varient en ambition selon la moyenne de l'étudiant.
+        * **Établissements Suggérés :** Liste des établissements recommandés pour chaque filière *(Nouveau)*
     * **Persistance :** La réponse JSON est sauvegardée dans Firestore.
-* **Limite de Génération :** Chaque étudiant est limité à **10 générations de recommandations par semaine** pour gérer le flux de l'API. Un compteur et un indicateur de quota restant sont affichés.
+* **Limite de Génération :** Chaque étudiant est limité à **3 générations de recommandations par semaine** pour gérer le flux de l'API. Un compteur et un indicateur de quota restant sont affichés.
 * **Visualisation des Compatibilités :**
     * Les parcours suggérés peuvent être affichés en mode **liste** ou en mode **graphique (Bar Chart)**, avec un bouton de bascule.
     * Les graphiques de compatibilité sont stylisés avec des couleurs graduées et des barres horizontales pour une comparaison claire des pourcentages.
 
 ---
 
-### 8. Technologies sous-jacentes
+### 9. Technologies sous-jacentes
 
 L'application est construite avec des technologies modernes et robustes :
 
@@ -140,3 +166,28 @@ L'application est construite avec des technologies modernes et robustes :
 * **API d'IA :** Intégration directe avec l'API **Groq (via Llama-3.3-70B-Versatile)** pour la génération des recommandations personnalisées.
 * **UI/UX :** Tailwind CSS pour un style rapide et cohérent, et Heroicons pour une intégration facile d'icônes vectorielles.
 * **Visualisation de Données :** Chart.js et Vue-Chartjs pour la création de graphiques interactifs.
+* **État Global :** Pinia pour la gestion d'état réactive avec persistance localStorage pour la démonstration.
+
+---
+
+## Nouvelles Fonctionnalités Clés
+
+### **Démonstration SaaS Complète**
+- Page d'accueil professionnelle avec démonstration interactive
+- Questionnaire de 25+ questions avec analyse IA réelle
+- Résultats partiellement restreints pour inciter à l'inscription
+- Sauvegarde de progression et reprise de session
+
+### **Système de Questionnaire Approfondi**
+- 30 questions supplémentaires pour affiner les recommandations
+- 3 catégories ciblées : Academic, Personal, Logic
+- Interface progressive avec indicateurs de completion
+- Intégration complète avec le système de recommandations IA
+
+### **Recommandations IA Enrichies**
+- Analyse basée sur les bulletins + questionnaire approfondi
+- Suggestions d'établissements pour chaque filière
+- Recommandations plus précises et personnalisées
+- Format structuré avec compatibilités et justifications détaillées
+
+Ces améliorations positionnent SmartParcours comme une solution complète d'orientation scolaire, alliant démonstration marketing efficace et outils d'analyse approfondie pour les établissements éducatifs.

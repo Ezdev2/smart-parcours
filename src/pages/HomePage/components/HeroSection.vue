@@ -1,5 +1,5 @@
 <template>
-  <section class="md:px-80 mt-8 md:mt-0 relative h-screen flex flex-col items-center justify-center text-center overflow-hidden animated-gradient">
+  <section class="px-12 md:px-16 mt-8 md:mt-0 relative h-screen flex flex-col items-center justify-center text-center overflow-hidden animated-gradient">
     <!-- Main Content -->
     <div class="absolute inset-0 z-0 pattern-dots opacity-10"></div>
     <div class="relative z-10 flex flex-col items-center px-4 md:mb-80 animate-fade-in-up">
@@ -11,14 +11,14 @@
                 Optimisez le parcours de vos élèves avec l'Intelligence Artificielle et un suivi personnalisé pour un
                 avenir prometteur.
             </p>
-            <div class="flex flex-col sm:flex-row items-center gap-4">
+            <div class="flex flex-col md:flex-row items-center gap-4">
                 <button @click="$emit('add-school')"
                     class="w-full sm:w-auto flex items-center justify-center gap-3 bg-indigo-600 text-white font-bold px-8 py-4 rounded-full shadow-lg hover:shadow-xl hover:bg-indigo-700 transform hover:-translate-y-1 transition-all duration-300">
                     <SparklesIcon class="h-8 w-8 text-white" />
                     <span>Inscrire mon Établissement</span>
                 </button>
                 <router-link to="/login" @click="mobileMenuOpen = false"
-                    class="w-full sm:w-auto flex items-center justify-center gap-3 bg-white text-indigo-600 font-bold px-8 py-4 rounded-full shadow-lg hover:shadow-xl border border-gray-200 transform hover:-translate-y-1 transition-all duration-300">
+                    class="w-full md:w-auto flex items-center justify-center gap-3 bg-white text-indigo-600 font-bold px-8 py-4 rounded-full shadow-lg hover:shadow-xl border border-gray-200 transform hover:-translate-y-1 transition-all duration-300">
                     <UsersIcon class="h-8 w-8 text-indigo-600" />
                     <span>J'ai un compte</span>
                 </router-link>

@@ -135,18 +135,18 @@ onBeforeUnmount(() => {
 
 const cards = [
   {
-    title: 'Orientation IA personnalisée ',
-    description:
-      'Des recommandations sur mesure pour chaque élève, basées sur une analyse profonde de leur parcours académique et de leurs intérêts.',
-      icon: SparklesIcon,
-      color: "text-indigo-600"
-  },
-  {
     title: 'Gestion complète des bulletins',
     description:
       'Centralisez, gérez et éditez facilement les bulletins de notes. Accès historique complet et génération PDF instantanée.',
     icon: DocumentTextIcon,
     color: "text-green-600"
+  },
+  {
+    title: 'Orientation IA sur mesure',
+    description:
+      'Des recommandations sur mesure pour chaque élève, basées sur une analyse profonde de leur parcours académique et de leurs intérêts.',
+      icon: SparklesIcon,
+      color: "text-indigo-600"
   },
   {
     title: 'Suivi des élèves intuitif',
@@ -156,21 +156,21 @@ const cards = [
     color: "text-blue-600"
   },
   {
-    title: 'Optimisation des carrières',
+    title: 'Croissance de carrière',
     description:
       'Aidez les élèves à visualiser leur futur professionnel avec des suggestions de métiers et des analyses de compatibilité.',
     icon: BriefcaseIcon,
     color: "text-indigo-600"
   },
   {
-    title: 'Paramètres personnalisables',
+    title: 'Paramètres avancées',
     description:
       'Configurez facilement le nom de votre établissement, les classes, les matières, et gérez les accès des enseignants.',
     icon: CogIcon,
     color: "text-red-600"
   },
   {
-    title: 'Sécurité et Confidentialité',
+    title: 'Protection des données',
     description:
       'Vos données et celles de vos élèves sont protégées par les meilleures pratiques de sécurité et des contrôles d\'accès rigoureux.',
     icon: ShieldCheckIcon,
