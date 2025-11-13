@@ -14,22 +14,22 @@
             </div>
 
             <!-- Youtube -->
-            <!-- <div class="relative w-full mx-auto bg-gray-200 rounded-xl overflow-hidden shadow-2xl animate-fade-in-on-scroll delay-400"
+            <div class="col-span-2 relative w-full mx-auto bg-gray-200 rounded-xl overflow-hidden shadow-1xl animate-fade-in-on-scroll delay-400 h-full object-cover"
                 style="padding-top: 56.25%;">
-                <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/4Cgn5cLSaSA"
+                <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/uEMupgUE02I?si=b8_C2sAVy3r4AKqm"
                     frameborder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen>
                 </iframe>
-            </div> -->
+            </div>
 
-            <video
+            <!-- <video
                 class="col-span-2 relative w-full mx-auto bg-gray-200 rounded-xl overflow-hidden shadow-1xl animate-fade-in-on-scroll delay-400 h-full object-cover"
                 autoplay muted loop playsinline>
                 <source src="https://videos.pexels.com/video-files/9198421/9198421-hd_1920_1080_25fps.mp4"
                     type="video/mp4" />
                 Votre navigateur ne supporte pas la vidéo HTML5.
-            </video>
+            </video> -->
         </div>
     </section>
 </template>

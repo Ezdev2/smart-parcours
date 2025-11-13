@@ -16,7 +16,7 @@ Le cœur de l'application repose sur un système d'authentification robuste via 
 
 ---
 
-### 2. **Page d'Accueil SaaS avec Démonstration Interactive** *(Nouveau)*
+### 2. **Page d'Accueil SaaS avec Démonstration Interactive** 
 
 Une page d'accueil moderne de style SaaS présente le service SmartParcours avec un espace démonstration intégré.
 
@@ -121,7 +121,7 @@ C'est la fonctionnalité centrale de l'application "SmartParcours", offrant des 
 
 * **Accès à la Dernière Recommandation :** L'étudiant voit d'emblée sa recommandation la plus récente.
 * **Historique des Recommandations :** Accès à un historique cliquable de toutes les recommandations générées, permettant de revoir les analyses précédentes.
-* **Questionnaire d'Approfondissement :** *(Nouveau)*
+* **Questionnaire d'Approfondissement :** 
     * **30 Questions Ciblées :** Système de questionnaire complémentaire avec 30 questions réparties en 3 catégories :
         - **Academic (5 questions) :** Préférences d'apprentissage, durée d'études, orientation recherche/pratique
         - **Personal (10 questions) :** Motivations professionnelles, environnement de travail, équilibre vie-travail, entrepreneuriat, carrière internationale
@@ -135,7 +135,7 @@ C'est la fonctionnalité centrale de l'application "SmartParcours", offrant des 
         * Centres d'intérêt et filières d'intérêt exprimés.
         * Âge de l'étudiant.
         * Moyenne générale globale et niveau scolaire.
-        * **Réponses détaillées du questionnaire d'approfondissement** *(Nouveau)*
+        * **Réponses détaillées du questionnaire d'approfondissement** 
     * **Analyse Plus Précise :** L'IA dispose d'informations plus complètes pour des recommandations personnalisées de haute qualité.
     * **Format de Réponse Strict :** L'IA est instruite de renvoyer une réponse au **format JSON structuré** et prédéfini de l'application, incluant :
         * **Titre et Contenu :** Résumé de l'analyse.
@@ -148,7 +148,7 @@ C'est la fonctionnalité centrale de l'application "SmartParcours", offrant des 
             * Des nombres minimum de suggestions sont exigés par groupe (ex: 3+ filières, 2+ domaines, 6+ métiers).
             * Les filières suggérées sont précises et adaptées au contexte (Madagascar/international).
             * Les métiers suggérés varient en ambition selon la moyenne de l'étudiant.
-        * **Établissements Suggérés :** Liste des établissements recommandés pour chaque filière *(Nouveau)*
+        * **Établissements Suggérés :** Liste des établissements recommandés pour chaque filière 
     * **Persistance :** La réponse JSON est sauvegardée dans Firestore.
 * **Limite de Génération :** Chaque étudiant est limité à **3 générations de recommandations par semaine** pour gérer le flux de l'API. Un compteur et un indicateur de quota restant sont affichés.
 * **Visualisation des Compatibilités :**

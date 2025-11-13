@@ -14,14 +14,12 @@
     <div v-else class="space-y-6">
       <div class="border-b border-gray-200">
         <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-          <a v-for="tab in settingsTabs" :key="tab.id"
-             @click="activeSettingsTab = tab.id"
-             :class="[
-               activeSettingsTab === tab.id
-                 ? 'border-blue-500 text-blue-600'
-                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-               'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer'
-             ]">
+          <a v-for="tab in settingsTabs" :key="tab.id" @click="activeSettingsTab = tab.id" :class="[
+            activeSettingsTab === tab.id
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer'
+          ]">
             {{ tab.name }}
           </a>
         </nav>
@@ -58,7 +56,7 @@
               Personnalisation
             </h2>
             <div class="space-y-4">
-              <div>
+              <!-- <div>
                 <label class="block text-sm font-medium text-gray-700">
                   Couleur principale
                 </label>
@@ -70,7 +68,7 @@
                   <div class="h-10 w-20 rounded-md border border-gray-300"
                     :style="{ backgroundColor: formData.themeColor }"></div>
                 </div>
-              </div>
+              </div> -->
               <div>
                 <label class="block text-sm font-medium text-gray-700">
                   Logo de l'établissement (URL)
@@ -79,8 +77,9 @@
                   <input type="url" v-model="formData.logoUrl" placeholder="https://example.com/logo.png"
                     class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
                   <div v-if="formData.logoUrl" class="flex-shrink-0">
-                    <img :src="formData.logoUrl" alt="Logo" class="h-16 w-16 object-contain border border-gray-200 rounded-md"
-                      @error="logoError = true" @load="logoError = false" />
+                    <img :src="formData.logoUrl" alt="Logo"
+                      class="h-16 w-16 object-contain border border-gray-200 rounded-md" @error="logoError = true"
+                      @load="logoError = false" />
                     <p v-if="logoError" class="text-xs text-red-500 mt-1">Image invalide</p>
                   </div>
                 </div>
@@ -99,7 +98,7 @@
               <div v-for="(classId, index) in formData.classes" :key="index" class="flex items-center space-x-2">
                 <div class="flex-1 p-3 bg-gray-50 rounded-md border">
                   <span class="font-medium">{{ getClassDisplayName(classId) }}</span>
-                  <span class="text-sm text-gray-500 ml-2">({{ classId }})</span>
+                  <!-- <span class="text-sm text-gray-500 ml-2">({{ classId }})</span> -->
                 </div>
                 <Button type="button" variant="outline" size="sm" @click="removeClassFromSettings(index)"
                   class="text-red-600 hover:text-red-700">
@@ -110,7 +109,8 @@
                 <select v-model="selectedNewClass"
                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                   <option value="">Sélectionner une classe à ajouter</option>
-                  <option v-for="availableClass in availableClasses" :key="availableClass.id" :value="availableClass.id">
+                  <option v-for="availableClass in unselectedClasses" :key="availableClass.id"
+                    :value="availableClass.id">
                     {{ availableClass.name }} ({{ availableClass.level }})
                   </option>
                 </select>
@@ -126,6 +126,10 @@
                   <select v-model="newClass.level"
                     class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     <option value="">Niveau</option>
+                    <option value="6ème">6ème</option>
+                    <option value="5ème">5ème</option>
+                    <option value="4ème">4ème</option>
+                    <option value="3ème">3ème</option>
                     <option value="Seconde">Seconde</option>
                     <option value="Première">Première</option>
                     <option value="Terminale">Terminale</option>
@@ -155,7 +159,7 @@
               <div v-for="(subjectId, index) in formData.subjects" :key="index" class="flex items-center space-x-2">
                 <div class="flex-1 p-3 bg-gray-50 rounded-md border">
                   <span class="font-medium">{{ getSubjectDisplayName(subjectId) }}</span>
-                  <span class="text-sm text-gray-500 ml-2">({{ subjectId }})</span>
+                  <!-- <span class="text-sm text-gray-500 ml-2">({{ subjectId }})</span> -->
                 </div>
                 <Button type="button" variant="outline" size="sm" @click="removeSubjectFromSettings(index)"
                   class="text-red-600 hover:text-red-700">
@@ -166,7 +170,7 @@
                 <select v-model="selectedNewSubject"
                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                   <option value="">Sélectionner une matière à ajouter</option>
-                  <option v-for="availableSubject in availableSubjects" :key="availableSubject.id"
+                  <option v-for="availableSubject in unselectedSubjects" :key="availableSubject.id"
                     :value="availableSubject.id">
                     {{ availableSubject.name }} ({{ availableSubject.code }})
                   </option>
@@ -214,7 +218,8 @@
       </template>
 
       <template v-else-if="activeSettingsTab === 'teachers'">
-        <TeachersSettings /> </template>
+        <TeachersSettings />
+      </template>
 
     </div>
     <ConfirmDialog />
@@ -289,6 +294,18 @@ const settingsTabs = [
 ]
 
 // Computed properties
+const unselectedClasses = computed(() => {
+  return availableClasses.value.filter(
+    (availableClass) => !formData.value.classes.includes(availableClass.id)
+  )
+})
+
+const unselectedSubjects = computed(() => {
+  return availableSubjects.value.filter(
+    (availableSubject) => !formData.value.subjects.includes(availableSubject.id)
+  )
+})
+
 const getClassDisplayName = (classId) => {
   const cls = availableClasses.value.find(c => c.id === classId)
   return cls ? cls.name : classId

@@ -883,7 +883,7 @@ export class FirebaseService {
         suggestedPaths: doc.data().suggestedPaths || [],
         strengths: doc.data().strengths || [],
         improvementAreas: doc.data().improvementAreas || [],
-        academicProfile: doc.data().academicProfile || null, // <<< NEW: Ensure academicProfile is retrieved >>>
+        academicProfile: doc.data().academicProfile || null,
       }));
     } catch (error) {
       console.error("Error getting recommendations:", error);
